@@ -1,4 +1,5 @@
 /* kmain.c - Kernel main function */
+#include "fb.h"
 
 #include "fb.h"
 #include "serial.h"
@@ -14,6 +15,7 @@ void kmain(void)
     /* Test framebuffer */
     fb_write("Hello from the framebuffer!\n", 29);
     fb_write("Hydra OS is running.\n", 22);
+    fb_write_impl("Like and subscribe.\n\n", 22, FB_RED,FB_LIGHT_GREY);
     
     /* Test serial port */
     serial_write("Hello from the serial port!\n", 29);

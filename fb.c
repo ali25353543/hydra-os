@@ -4,25 +4,25 @@
 #include "io.h"
 
 /* The I/O ports */
-#define FB_COMMAND_PORT         0x3D4
-#define FB_DATA_PORT            0x3D5
+#define FB_COMMAND_PORT 0x3D4
+#define FB_DATA_PORT 0x3D5
 
 /* The I/O port commands */
-#define FB_HIGH_BYTE_COMMAND    14
-#define FB_LOW_BYTE_COMMAND     15
+#define FB_HIGH_BYTE_COMMAND 14
+#define FB_LOW_BYTE_COMMAND 15
 
 /* Framebuffer memory-mapped I/O starting address */
-#define FB_ADDRESS              0x000B8000
+#define FB_ADDRESS 0x000B8000
 
 /* Framebuffer dimensions */
-#define FB_NUM_COLS             80
-#define FB_NUM_ROWS             25
+#define FB_NUM_COLS 80
+#define FB_NUM_ROWS 25
 
 /* Current cursor position */
 static unsigned short cursor_pos = 0;
 
 /* Framebuffer pointer */
-static char *fb = (char *) FB_ADDRESS;
+static char *fb = (char *)FB_ADDRESS;
 
 /** fb_write_cell:
  *  Writes a character with the given foreground and background to position i
@@ -59,32 +59,40 @@ static void fb_move_cursor(unsigned short pos)
  *  @param len The length of the buffer
  *  @return    The number of bytes written
  */
-int fb_write(char *buf, unsigned int len)
+int fb_write_impl(char *buf, unsigned int len, unsigned int fg, unsigned int bg)
 {
     unsigned int i;
-    
-    for (i = 0; i < len; i++) {
+
+    for (i = 0; i < len; i++)
+    {
         char c = buf[i];
-        
+
         /* Handle newline */
-        if (c == '\n') {
+        if (c == '\n')
+        {
             /* Move to next line */
             cursor_pos = (cursor_pos / FB_NUM_COLS + 1) * FB_NUM_COLS;
-        } else {
+        }
+        else
+        {
             /* Write character at current cursor position */
-            fb_write_cell(cursor_pos * 2, c, FB_BLACK, FB_LIGHT_GREY);
+            fb_write_cell(cursor_pos * 2, c, bg, fg);
             cursor_pos++;
         }
-        
+
         /* Check if we need to scroll */
-        if (cursor_pos >= FB_NUM_COLS * FB_NUM_ROWS) {
+        if (cursor_pos >= FB_NUM_COLS * FB_NUM_ROWS)
+        {
             /* Simple solution: wrap to beginning (no actual scrolling) */
             cursor_pos = 0;
         }
     }
-    
+
     /* Move the cursor to the new position */
     fb_move_cursor(cursor_pos);
-    
+
     return len;
 }
+
+/* Macro for default colors */
+#define fb_write(buf, len) fb_write_impl(buf, len, FB_CYAN, FB_BLACK)

@@ -1,5 +1,5 @@
 default=0
 timeout -1
 
-title MultiX OS
+title Hydra OS
 kernel /boot/kernel.elf

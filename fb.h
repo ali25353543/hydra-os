@@ -28,6 +28,8 @@
  *  @param len The length of the buffer
  *  @return    The number of bytes written
  */
-int fb_write(char *buf, unsigned int len);
+#define fb_write(buf, len) fb_write_impl(buf, len, FB_CYAN, FB_BLACK)
+int fb_write_impl(char *buf, unsigned int len, unsigned int fg, unsigned int bg);
+
 
 #endif /* INCLUDE_FB_H */
