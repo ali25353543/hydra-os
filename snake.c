@@ -26,6 +26,11 @@ static int next_direction;
 static struct segment food;
 static int score;
 static int game_over;
+static int game_started;
+
+/* Forward declarations */
+void draw_snake(void);
+void draw_food(void);
 
 /* Simple random number generator */
 static unsigned int seed = 12345;
@@ -103,6 +108,18 @@ void draw_at(int x, int y, char c) {
     fb[pos * 2 + 1] = 0x0F;  /* White on black */
 }
 
+/* Draw centered text */
+void draw_centered_text(int y, const char *text) {
+    int len = 0;
+    int i;
+    while (text[len] != '\0') len++;
+    
+    int start_x = (GAME_WIDTH - len) / 2;
+    for (i = 0; i < len; i++) {
+        draw_at(start_x + i, y, text[i]);
+    }
+}
+
 /* Clear the game area */
 void clear_game_area(void) {
     int x, y;
@@ -150,11 +167,24 @@ void generate_food(void) {
     } while (!valid);
 }
 
+/* Calculate delay based on score */
+int calculate_delay(void) {
+    int base_delay = 50;
+    int speed_increase = score / 50;  /* Increase speed every 50 points */
+    int new_delay = base_delay - (speed_increase * 5);
+    
+    if (new_delay < 10) {
+        new_delay = 10;  /* Minimum delay to keep game playable */
+    }
+    
+    return new_delay;
+}
+
 /* Initialize the game */
 void init_game(void) {
     /* Clear screen and draw UI */
     fb_clear();
-    fb_puts("SNAKE GAME - Use WASD to move, Q to quit\n");
+    fb_puts("SNAKE GAME - Use (W A S D) to move, Q to quit\n");
     fb_puts("Score: 0\n");
     
     /* Initialize snake in the middle */
@@ -170,6 +200,7 @@ void init_game(void) {
     next_direction = DIR_RIGHT;
     score = 0;
     game_over = 0;
+    game_started = 0;
     
     /* Seed random with snake position */
     srand(snake[0].x * snake[0].y * 12345);
@@ -180,6 +211,21 @@ void init_game(void) {
     /* Draw game area */
     clear_game_area();
     draw_border();
+    
+    /* Display start message in center */
+    draw_centered_text(GAME_HEIGHT / 2 - 1, "Press any key to START");
+    
+    /* Wait for key press to start */
+    while (keyboard_get_char() == 0) {
+        /* Wait */
+    }
+    
+    /* Clear the start message and draw game */
+    clear_game_area();
+    draw_border();
+    draw_snake();
+    draw_food();
+    game_started = 1;
 }
 
 /* Update the score display */
@@ -330,7 +376,7 @@ void process_input(void) {
                 break;
             case 'q':
             case 'Q':
-                game_over = 1;
+                game_over = 2;  /* 2 means quit to shell */
                 break;
         }
     }
@@ -338,36 +384,50 @@ void process_input(void) {
 
 /* Main game function */
 void snake_game(void) {
-    init_game();
+    int quit_game = 0;
     
-    /* Game loop */
-    while (!game_over) {
-        /* Process input */
-        process_input();
+    while (!quit_game) {
+        init_game();
         
-        /* Update game state */
-        update_game();
+        /* Game loop */
+        while (!game_over) {
+            /* Process input */
+            process_input();
+            
+            /* Update game state */
+            update_game();
+            
+            /* Draw everything */
+            draw_snake();
+            draw_food();
+            
+            /* Delay for game speed (increases with score) */
+            delay(calculate_delay());
+        }
         
-        /* Draw everything */
-        draw_snake();
-        draw_food();
-        
-        /* Delay for game speed */
-        delay(50);
-    }
-    
-    /* Game over screen */
-    fb_clear();
-    fb_puts("GAME OVER!\n\n");
-    fb_puts("Final Score: ");
-    
-    char score_str[20];
-    int_to_str(score, score_str);
-    fb_puts(score_str);
-    fb_puts("\n\nPress any key to return to shell...\n");
-    
-    /* Wait for key press */
-    while (keyboard_get_char() == 0) {
-        /* Wait */
+        /* Game over screen */
+        if (game_over == 1) {
+            fb_clear();
+            fb_puts("GAME OVER!\n\n");
+            fb_puts("Final Score: ");
+            
+            char score_str[20];
+            int_to_str(score, score_str);
+            fb_puts(score_str);
+            fb_puts("\n\nPress any key to restart or Q to quit...\n");
+            
+            /* Wait for key press */
+            char c = 0;
+            while (c == 0) {
+                c = keyboard_get_char();
+            }
+            
+            if (c == 'q' || c == 'Q') {
+                quit_game = 1;
+            }
+            /* Otherwise loop back to start a new game */
+        } else if (game_over == 2) {
+            quit_game = 1;
+        }
     }
 }
