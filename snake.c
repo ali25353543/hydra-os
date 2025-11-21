@@ -44,7 +44,7 @@ void srand(unsigned int s) {
     seed = s;
 }
 
-/* Delay function (very crude) */
+/* Delay function */
 void delay(unsigned int count) {
     volatile unsigned int i, j;
     for (i = 0; i < count; i++) {
