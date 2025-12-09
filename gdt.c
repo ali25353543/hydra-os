@@ -16,7 +16,7 @@ struct gdt_ptr
 {
     unsigned short limit;
     unsigned int base;
-} __attribute__((packed));
+}__attribute__((packed));
 
 /* Our GDT, with 3 entries */
 struct gdt_entry gdt[3];

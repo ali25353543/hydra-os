@@ -6,7 +6,7 @@
  *
  *  @param idt  The address of the IDT structure
  */
-void load_idt(unsigned int *idt);
+void load_idt(void *idt);
 
 /** idt_install:
  *  Sets up the IDT
