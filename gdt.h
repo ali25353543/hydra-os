@@ -6,7 +6,7 @@
  *
  *  @param gdt  The address of the GDT structure
  */
-void load_gdt(unsigned int *gdt);
+void load_gdt(void *gdt);
 
 /** gdt_install:
  *  Sets up the GDT
