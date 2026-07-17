@@ -19,7 +19,7 @@ struct gdt_ptr
 }__attribute__((packed));
 
 /* Our GDT, with 3 entries */
-struct gdt_entry gdt[3];
+struct gdt_entry gdt[6];
 struct gdt_ptr gp;
 
 /** gdt_set_gate:
@@ -49,12 +49,14 @@ void gdt_set_gate(int num, unsigned int base, unsigned int limit, unsigned char 
  */
 void gdt_install(void)
 {
-    gp.limit = (sizeof(struct gdt_entry) * 3) - 1;
+    gp.limit = (sizeof(struct gdt_entry) * 6) - 1;
     gp.base = (unsigned int)&gdt;
 
     gdt_set_gate(0, 0, 0, 0, 0);                /* NULL descriptor */
     gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); /* Code segment */
     gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); /* Data segment */
-
-    load_gdt(&gp);  // Changed from: load_gdt((unsigned int *)&gp);
+    gdt_set_gate(3, 0, 0x000FFFFF, 0x9A, 0x0F); /* Code segment (16 bit)*/
+    gdt_set_gate(4, 0, 0x000FFFFF, 0x92, 0x0F); /* Data segment (16 bit)*/
+    gdt_set_gate(5, 0, 0x000FFFFF, 0x92, 0x00); /* Real Mode Compatible segment (16 bit)*/
+    load_gdt((unsigned int)&gp);  // Changed from: load_gdt((unsigned int *)&gp);
 }

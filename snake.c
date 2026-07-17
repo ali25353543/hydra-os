@@ -93,6 +93,32 @@ void int_to_str(int num, char *str) {
     }
 }
 
+int str_to_int(const char *str) {
+    int result = 0;
+    int sign = 1;
+    
+    // تخطي المسافات البيضاء
+    while (*str == ' ') {
+        str++;
+    }
+    
+    // التعامل مع الإشارة
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+    
+    // تحويل الأرقام
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+    
+    return result * sign;
+}
+
 /* Draw a character at a specific position */
 void draw_at(int x, int y, char c) {
     if (x < 0 || x >= GAME_WIDTH || y < 0 || y >= GAME_HEIGHT) {
@@ -383,7 +409,7 @@ void process_input(void) {
 }
 
 /* Main game function */
-void snake_game(void) {
+int snake_game(void) {
     int quit_game = 0;
     
     while (!quit_game) {
@@ -430,4 +456,5 @@ void snake_game(void) {
             quit_game = 1;
         }
     }
+    return 0;
 }

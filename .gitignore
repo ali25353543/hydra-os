@@ -1,5 +1,5 @@
 *.o
 kernel.elf
-hydra.iso
+hydra.img
 com1.out
-os_code.zip
+*.bin

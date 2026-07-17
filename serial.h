@@ -74,6 +74,6 @@ int serial_is_transmit_fifo_empty(unsigned int com);
  *  @param len  The length of the buffer
  *  @return     The number of bytes written
  */
-int serial_write(char *buf, unsigned int len);
+int serial_write(char *buf);
 
 #endif /* INCLUDE_SERIAL_H */

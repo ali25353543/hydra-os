@@ -84,12 +84,14 @@ int serial_is_transmit_fifo_empty(unsigned int com)
  *  @param len  The length of the buffer
  *  @return     The number of bytes written
  */
-int serial_write(char *buf, unsigned int len)
+int serial_write(char *buf)
 {
-    unsigned int i;
-    for (i = 0; i < len; i++) {
+    unsigned int i = 0;
+    while (buf[i] != 0)
+    {
         while (serial_is_transmit_fifo_empty(SERIAL_COM1_BASE) == 0);
         outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), buf[i]);
+        i++;
     }
-    return len;
+    return 0;
 }

@@ -1,6 +1,7 @@
 global outb             ; make the label outb visible outside this file
+global outw             ; make the label outw visible outside this file
 global inb              ; make the label inb visible outside this file
-
+global inw              ; make the label inw visible outside this file
 ; outb - send a byte to an I/O port
 ; stack: [esp + 8] the data byte
 ;        [esp + 4] the I/O port
@@ -18,3 +19,12 @@ inb:
     mov dx, [esp + 4]    ; move the address of the I/O port to the dx register
     in al, dx            ; read a byte from the I/O port and store it in the al register
     ret                  ; return the read byte
+inw:
+    mov dx, [esp + 4]
+    in ax,dx
+    ret
+outw:
+    mov ax, [esp + 8]
+    mov dx, [esp + 4]
+    out dx, ax
+    ret

@@ -11,5 +11,7 @@
         "gdt.h": "c",
         "bitset": "c",
         "cstddef": "c"
-    }
+    },
+    "debug.allowBreakpointsEverywhere": true,
+    "makefile.configureOnOpen": false
 }

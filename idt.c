@@ -168,7 +168,6 @@ void idt_install(void)
  */
 void interrupt_handler_main(unsigned int *regs)
 {
-    serial_write("INT!\n", 5);
     
     // Stack layout when we get here:
     // regs points to the top of the stack after we pushed esp
@@ -184,19 +183,29 @@ void interrupt_handler_main(unsigned int *regs)
     
     // Skip: gs(0), fs(1), es(2), ds(3), and 8 pusha registers = 12 total
     unsigned int interrupt = stack_ptr[12];  // interrupt number
-    
-    serial_write("INT NUM: ", 9);
-    char buf[10];
+    unsigned int error_code = stack_ptr[13]; // error code
+
+    serial_write("INT NUM: ");
+    char buf[2];
     buf[0] = '0' + (interrupt / 10);
     buf[1] = '0' + (interrupt % 10);
-    serial_write(buf, 2);
-    serial_write("\n", 1);
-    
+    serial_write(buf);
+    serial_write(" | ");
+
+    serial_write("ERR CODE: ");
+    buf[0] = '0' + (error_code / 10);
+    buf[1] = '0' + (error_code % 10);
+    serial_write(buf);
+    serial_write("\n");
+
     /* Handle keyboard interrupt */
     if (interrupt == 33) {  // 33 = 0x21 in decimal
-        serial_write("KBD!\n", 5);
+        serial_write("KBD!\n");
         unsigned char scan_code = read_scan_code();
         keyboard_handle_interrupt(scan_code);
+        pic_acknowledge(interrupt);
+    } else if (interrupt == 0) {
+        serial_write("#DE\n");
         pic_acknowledge(interrupt);
     } else {
         pic_acknowledge(interrupt);

@@ -1,26 +1,29 @@
-ENTRY(loader)                /* the name of the entry label */
+ENTRY(loader) /* اسم رمز نقطة الدخول */
 
-SECTIONS {
-    . = 0x00100000;          /* the code should be loaded at 1 MB */
-
-    .text ALIGN (0x1000) :   /* align at 4 KB */
+SECTIONS
+{
+    /* يجب وضع تعيين العنوان داخل كتلة SECTIONS */
+    . = 0x00100000; /* العنوان الظاهري VMA = 3GB + 1MB */
+    kernel_phisycal_address = .;
+    .text ALIGN(0x1000) :
     {
-        *(.text)             /* all text sections from all files */
+        *(.text .text.*) /* جميع أجزاء الكود */
     }
 
-    .rodata ALIGN (0x1000) : /* align at 4 KB */
+    .rodata ALIGN(0x1000) :
     {
-        *(.rodata*)          /* all read-only data sections from all files */
+        *(.rodata*) /* البيانات القابلة للقراءة فقط */
     }
 
-    .data ALIGN (0x1000) :   /* align at 4 KB */
+    .data ALIGN(0x1000) :
     {
-        *(.data)             /* all data sections from all files */
+        *(.data .data.*) /* البيانات المعرفة المتغيرة */
     }
 
-    .bss ALIGN (0x1000) :    /* align at 4 KB */
+    .bss ALIGN(0x1000) :
     {
-        *(COMMON)            /* all COMMON sections from all files */
-        *(.bss)              /* all bss sections from all files */
+        *(COMMON)
+        *(.bss .bss.*)
     }
+    kernel_phisycal_end = .;
 }

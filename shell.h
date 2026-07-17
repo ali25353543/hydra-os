@@ -11,4 +11,6 @@ void shell_init(void);
  */
 void shell_update(void);
 
+int shell_execute_command(char *buf);
+
 #endif /* INCLUDE_SHELL_H */

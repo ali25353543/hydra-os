@@ -27,17 +27,17 @@ void keyboard_init(void)
  */
 void keyboard_handle_interrupt(unsigned char scan_code)
 {
-    serial_write("SCAN: ", 6);
-    serial_write((char*)&scan_code, 1);
-    serial_write("\n", 1);
+    serial_write("SCAN: ");
+    serial_write((char *)&scan_code);
+    serial_write("\n");
     
     /* Only handle key presses (scan codes < 0x80) */
     if (scan_code < 0x80) {
         if (scan_code < sizeof(scan_code_to_ascii)) {
             last_char = scan_code_to_ascii[scan_code];
-            serial_write("ASCII: ", 7);
-            serial_write(&last_char, 1);
-            serial_write("\n", 1);
+            serial_write("ASCII: ");
+            serial_write(&last_char);
+            serial_write("\n");
         }
     }
 }

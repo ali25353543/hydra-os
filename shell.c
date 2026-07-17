@@ -3,27 +3,16 @@
 #include "keyboard.h"
 #include "serial.h"
 #include "snake.h"
+#include "beep.h"
+#include "multiboot.h"
+#include "types.h"
 
 #define COMMAND_BUFFER_SIZE 256
 
 static char command_buffer[COMMAND_BUFFER_SIZE];
 static unsigned int buffer_index = 0;
-
-/** strcmp:
- *  Simple string comparison function
- *
- *  @param s1  First string
- *  @param s2  Second string
- *  @return    0 if equal, non-zero otherwise
- */
-int strcmp(const char *s1, const char *s2)
-{
-    while (*s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-    }
-    return *(unsigned char *)s1 - *(unsigned char *)s2;
-}
+static char *prompt = "> ";
+static int state = 0;
 
 /** shell_clear_command:
  *  Clears the screen
@@ -60,7 +49,7 @@ void shell_echo_command(char *args)
 /** shell_about_command:
  *  Displays information about the OS
  */
-void shell_about_command(void)
+int shell_about_command(void)
 {
     fb_puts("Hydra OS - Chapter 1-6 Implementation\n");
     fb_puts("A simple operating system kernel\n");
@@ -71,68 +60,90 @@ void shell_about_command(void)
         "\n"
         "i really want to challenge myself and go through a new journey to deal with low-level code\n"
         "it's really funny, hard, with a lot of tears tbh, but it was a really fun experience\n");
+    return 0;
 }
 
 /** shell_play_command:
  *  Launches the Snake game
  */
-void shell_play_command(void)
+int shell_play_command(void)
 {
-    snake_game();
+    state = snake_game();
     /* After game ends, redraw shell */
     fb_clear();
     fb_puts("Welcome back to Hydra OS!\n");
     fb_puts("Type 'help' for available commands.\n\n");
+    return state;
 }
 
 /** shell_execute_command:
  *  Executes a command
  */
-void shell_execute_command(void)
+int shell_execute_command(char *buf)
 {
     /* Null-terminate the command */
-    command_buffer[buffer_index] = '\0';
-    
+    buf[buffer_index] = '\0';
     /* Skip empty commands */
     if (buffer_index == 0) {
-        fb_puts("> ");
-        return;
+        fb_puts(prompt);
+        return 0;
     }
     
     /* Parse command and arguments */
-    char *cmd = command_buffer;
-    char *args = command_buffer;
+    char *cmd = buf;
+    char *args = buf;
     
     /* Find first space to separate command from arguments */
-    while (*args && *args != ' ') {
-        args++;
-    }
+        while (*args && *args != ' ') {
+            args++;
+        }
     
-    if (*args == ' ') {
-        *args = '\0';
-        args++;
-    }
-    
+        if (*args == ' ') {
+            *args = '\0';
+            args++;
+        }
     /* Execute command */
     if (strcmp(cmd, "help") == 0) {
         shell_help_command();
+        buffer_index = 0;
+        fb_puts(prompt);
     } else if (strcmp(cmd, "clear") == 0) {
         shell_clear_command();
+        buffer_index = 0;
+        fb_puts(prompt);
     } else if (strcmp(cmd, "echo") == 0) {
         shell_echo_command(args);
+        buffer_index = 0;
+        fb_puts(prompt);
     } else if (strcmp(cmd, "about") == 0) {
         shell_about_command();
+        buffer_index = 0;
+        fb_puts(prompt);
     } else if (strcmp(cmd, "play") == 0) {
-        shell_play_command();
+        state = shell_play_command();
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(cmd, "beep") == 0) {
+        char **parts = strsplit(args,' ');
+        char *freq = parts[0];
+        char *duration = parts[1];
+        int int_freq = str_to_int(freq);
+        int int_duration = str_to_int(duration);
+        beep(int_freq,int_duration);
+        buffer_index = 0;
+        fb_puts(prompt);
     } else {
+        /* we’ll never get here, unless the module code returns */
         fb_puts("Unknown command: ");
         fb_puts(cmd);
         fb_puts("\nType 'help' for available commands.\n");
+        buffer_index = 0;
+        fb_puts(prompt);
+        return 127;
     }
     
     /* Reset buffer and show prompt */
-    buffer_index = 0;
-    fb_puts("> ");
+    return 0;
 }
 
 /** shell_init:
@@ -141,10 +152,9 @@ void shell_execute_command(void)
 void shell_init(void)
 {
     buffer_index = 0;
-    fb_clear();
     fb_puts("Welcome to Hydra OS!\n");
     fb_puts("Type 'help' for available commands.\n\n");
-    fb_puts("> ");
+    fb_puts(prompt);
 }
 
 /** shell_update:
@@ -155,14 +165,14 @@ void shell_update(void)
     char c = keyboard_get_char();
     
     if (c != 0) {
-        serial_write("GOT CHAR: ", 10);
-        serial_write(&c, 1);
-        serial_write("\n", 1);
+        serial_write("GOT CHAR: ");
+        serial_write(&c);
+        serial_write("\n");
         
         if (c == '\n') {
             /* Execute command */
             fb_putc('\n');
-            shell_execute_command();
+            shell_execute_command(command_buffer);
         } else if (c == '\b') {
             /* Handle backspace */
             if (buffer_index > 0) {
