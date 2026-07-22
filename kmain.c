@@ -1,13 +1,13 @@
-#include "multiboot.h"
-#include "serial.h"
-#include "gdt.h"
-#include "idt.h"
-#include "keyboard.h"
-#include "shell.h"
-#include "io.h"
-#include "fb.h"
-#include "ata.h"
-#include "fat32.h"
+#include <multiboot.h>
+#include <serial.h>
+#include <gdt.h>
+#include <idt.h>
+#include <keyboard.h>
+#include <shell.h>
+#include <io.h>
+#include <fb.h>
+#include <ata.h>
+#include <fat32.h>
 
 void kmain(unsigned int ebx)
 {
@@ -30,10 +30,20 @@ void kmain(unsigned int ebx)
 
     __asm__("sti");
     serial_write("Interrupts Enabled!\n");
-        unsigned int addr = mbi->mods_addr;
-        typedef void (*call_module_t)(void);
-        call_module_t start = (call_module_t) addr;
-        start();
+            // 1. الإشارة إلى مصفوفة الموديولات والحصول على عنوان البداية
+        module_t *mod = (module_t *)mbi->mods_addr;
+        unsigned int module_start_address = mod->mod_start;
+        
+        serial_write("Jumping to module...\n");
+        
+        // 2. تحديث الـ typedef ليقبل مؤشرات الدوال كمعاملات (Arguments)
+        typedef void (*call_module_t)(int(*)(char *), void (*)(char *));
+        
+        // 3. تحويل العنوان إلى مؤشر الدالة الجديد
+        call_module_t start = (call_module_t) module_start_address;
+        
+        // 4. الاستدعاء الآن سيمر بدون أخطاء تجميع
+        start(serial_write, fb_puts);
     shell_init();
 
     ata_identify();

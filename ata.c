@@ -1,7 +1,6 @@
-#include "ata.h"
-#include "serial.h"
-#include "fb.h"
-
+#include <ata.h>
+#include <serial.h>
+#include <fb.h>
 static unsigned short sector[256];
 
 void ata_init() {

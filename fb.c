@@ -1,5 +1,5 @@
-#include "io.h"
-#include "fb.h"
+#include <io.h>
+#include <fb.h>
 
 /* The framebuffer address */
 char *fb = (char *) 0x000B8000;

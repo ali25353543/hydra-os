@@ -3,3 +3,4 @@ kernel.elf
 hydra.img
 com1.out
 *.bin
+*.a

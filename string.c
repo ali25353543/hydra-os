@@ -1,5 +1,3 @@
-//#include ""
-
 /** strcmp:
  *  Simple string comparison function
  *

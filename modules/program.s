@@ -1,10 +1,10 @@
-global start
-extern main
-section .text
-    start:
-        push ebp
-        mov esp, ebp
-        call main
-        pop ebp
-        mov ebp, esp
+global entry
+section .text.entry
+    extern module
+    entry:
+        push dword [esp + 8]
+        push dword [esp + 8]
+
+        call module
+        add esp, 8
         ret

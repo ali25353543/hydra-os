@@ -1,5 +1,5 @@
-#include "keyboard.h"
-#include "serial.h"
+#include <keyboard.h>
+#include <serial.h>
 
 /* US QWERTY keyboard layout scan code to ASCII table */
 static char scan_code_to_ascii[] = {

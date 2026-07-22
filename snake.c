@@ -1,6 +1,6 @@
-#include "snake.h"
-#include "fb.h"
-#include "keyboard.h"
+#include <snake.h>
+#include <fb.h>
+#include <keyboard.h>
 
 #define GAME_WIDTH 40
 #define GAME_HEIGHT 20

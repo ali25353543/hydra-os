@@ -1,11 +1,11 @@
-#include "shell.h"
-#include "fb.h"
-#include "keyboard.h"
-#include "serial.h"
-#include "snake.h"
-#include "beep.h"
-#include "multiboot.h"
-#include "types.h"
+#include <shell.h>
+#include <fb.h>
+#include <keyboard.h>
+#include <serial.h>
+#include <snake.h>
+#include <beep.h>
+#include <multiboot.h>
+#include <types.h>
 
 #define COMMAND_BUFFER_SIZE 256
 

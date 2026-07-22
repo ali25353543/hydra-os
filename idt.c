@@ -1,6 +1,6 @@
-#include "idt.h"
-#include "io.h"
-#include "serial.h"
+#include <idt.h>
+#include <io.h>
+#include <serial.h>
 
 /* Forward declaration */
 void keyboard_handle_interrupt(unsigned char scan_code);

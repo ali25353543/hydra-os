@@ -1,8 +1,8 @@
 OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o beep.o string.o ata.o fat32.o
-MODULES = program.bin prog.bin
+MODULES = prog.bin
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-         -nostartfiles -nodefaultlibs -fno-pic -fno-pie -Wall -Wextra -Werror -c
+         -nostartfiles -nodefaultlibs -fno-pic -fno-pie -Wall -Wextra -Werror -I ./include -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
@@ -55,14 +55,14 @@ idt_s.o: idt_asm.s
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
 
-%.o: ./modules/%.s
-	$(AS) -f elf $< -o $@
-
-%.o: ./modules/%.c
+./modules/%.o: ./modules/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
-%.bin: ./modules/%.o
-	ld -T modules/link.ld -melf_i386 -L . $< ./modules/program.o -l:fb.a -o $@
+./modules/program.o: ./modules/program.s
+	$(AS) -f elf $< -o $@
+
+%.bin: ./modules/entry.o ./modules/%.o
+	ld -T modules/link.ld -melf_i386 -L . ./modules/entry.o ./modules/$*.o ./modules/prog.o -l:fb.a -o $
 
 real_dev:
 	@echo "device letter" ; \
@@ -82,5 +82,5 @@ real_dev:
 	rm *.o kernel.elf *.bin
 
 clean:
-	rm -rf *.o kernel.elf *.bin ./modules/*.o *.a
+	rm -rf *.o kernel.elf *.bin modules/*.o 
 	sudo rm -rf /mnt/hydra
