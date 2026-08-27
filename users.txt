@@ -1,0 +1,4 @@
+user=root
+password=root
+user=ali
+password=ali

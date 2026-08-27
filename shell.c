@@ -6,6 +6,7 @@
 #include <beep.h>
 #include <multiboot.h>
 #include <types.h>
+#include <users.h>
 
 #define COMMAND_BUFFER_SIZE 256
 
@@ -123,6 +124,11 @@ int shell_execute_command(char *buf)
         state = shell_play_command();
         buffer_index = 0;
         fb_puts(prompt);
+    } else if (strcmp(cmd, "logout") == 0) {
+        fb_clear();
+        login();
+        buffer_index = 0;
+        fb_puts(prompt);
     } else if (strcmp(cmd, "beep") == 0) {
         char **parts = strsplit(args,' ');
         char *freq = parts[0];
@@ -179,6 +185,9 @@ void shell_update(void)
                 buffer_index--;
                 fb_putc('\b');
             }
+        } else if (c == 27) {
+            fb_clear();
+            login();
         } else if (buffer_index < COMMAND_BUFFER_SIZE - 1) {
             /* Add character to buffer */
             command_buffer[buffer_index] = c;

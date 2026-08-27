@@ -8,6 +8,7 @@
 #include <fb.h>
 #include <ata.h>
 #include <fat32.h>
+#include <users.h>
 
 void kmain(unsigned int ebx)
 {
@@ -44,6 +45,24 @@ void kmain(unsigned int ebx)
         
         // 4. الاستدعاء الآن سيمر بدون أخطاء تجميع
         start(serial_write, fb_puts);
+
+    // تأكد من أن السلسلة صحيحة
+ // تهيئة المستخدمين
+    users_init((char *)mod[1].mod_start);
+    extern user_t users[64];
+    // طباعة معلومات للتصحيح
+    fb_puts("Users initialized:\n");
+    for (uint8_t i = 0; i < 5; i++) {
+        fb_puts("User: ");
+        fb_puts(users[i].name);
+        fb_puts(" / Password: ");
+        fb_puts(users[i].password);
+        fb_putc('\n');
+        
+    }
+    
+login();
+
     shell_init();
 
     ata_identify();

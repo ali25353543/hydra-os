@@ -1,5 +1,7 @@
 #ifndef INCLUDE_TYPES_H
+
 #define INCLUDE_TYPES_H
+#define NULL 0
 
 typedef unsigned char uint8_t;
 typedef char int8_t;
@@ -15,5 +17,8 @@ int strcmp(const char *s1, const char *s2);
 char **strsplit(const char *str, char delim);
 int strlen(const char *s1);
 int strncmp(const char *s1, const char *s2, unsigned int n);
+int strcopy(const char *src, char *dist);
+char* strchar(char *str, char ch);
+char* strstring(char *haystack, char *needle);
 
 #endif //INCLUDE_TYPES_H

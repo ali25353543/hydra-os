@@ -73,3 +73,42 @@ int strncmp(const char *s1, const char *s2, unsigned int n)
     }
     return 0;  // جميع الأحرف متطابقة
 }
+
+int strcopy(const char *src, char *dist)
+{
+    int i = 0;
+    while (src[i] != 0 && i < strlen(src))
+    {
+        dist[i] = src[i];
+        i++;
+    }
+    i++;
+    dist[i] = 0;
+    return i;
+}
+
+char* strchar(char *str, char ch)
+{
+    unsigned char i = 0;
+    while (str[i] != '\0') {
+        if (str[i] == ch) return &str[i];
+        i++;
+    }
+    return (char*)0;
+}
+
+char* strstring(char *haystack, char *needle)
+{
+    unsigned char i = 0, j = 0;
+    while (haystack[i] != '\0') {
+        j = 0;
+        while (needle[j] != '\0' && haystack[i + j] != '\0' && haystack[i + j] == needle[j]) {
+            j++;
+        }
+        if (needle[j] == '\0') {
+            return &haystack[i];
+        }
+        i++;
+    }
+    return (char*)0;
+}

@@ -1,4 +1,5 @@
-OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o beep.o string.o ata.o fat32.o
+OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o \
+beep.o string.o ata.o fat32.o users.o
 MODULES = prog.bin
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
@@ -25,6 +26,7 @@ hydra.img: kernel.elf
 	sudo grub-install --target=i386-pc --boot-directory=/mnt/hydra/boot --force $$LOOP ; \
 	sudo mkdir -p /mnt/hydra/modules ; \
 	sudo cp ./*.bin /mnt/hydra/modules/ ; \
+	sudo cp ./users.txt /mnt/hydra/modules/ ; \
 	sudo cp ./kernel.elf /mnt/hydra/boot/kernel.elf ; \
 	sudo cp ./grub.cfg /mnt/hydra/boot/grub/grub.cfg ; \
 	sudo umount $$LOOP"p1" ; \
@@ -55,14 +57,8 @@ idt_s.o: idt_asm.s
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
 
-./modules/%.o: ./modules/%.c
-	$(CC) $(CFLAGS) $< -o $@
-
-./modules/program.o: ./modules/program.s
-	$(AS) -f elf $< -o $@
-
-%.bin: ./modules/entry.o ./modules/%.o
-	ld -T modules/link.ld -melf_i386 -L . ./modules/entry.o ./modules/$*.o ./modules/prog.o -l:fb.a -o $
+%.bin: ./modules/%.s
+	nasm -f bin $< -o $@
 
 real_dev:
 	@echo "device letter" ; \
