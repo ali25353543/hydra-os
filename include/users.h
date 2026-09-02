@@ -12,7 +12,8 @@ typedef struct {
     char password[MAX_USER_PASSWORD_LENGTH];
 } user_t;
 
-void users_init(char *file);
+void users_init(
+    /*char *file*/);
 uint8_t login();
 
 #endif

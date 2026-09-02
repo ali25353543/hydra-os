@@ -23,9 +23,7 @@ void users_init(char *file) {
     i++;
 
    }
-   
 }
-
 static uint8_t check_name(char *name) {
     for (uint8_t i = 0; i < MAX_USERS; i++) {
         if (strcmp(name, users[i].name) == 0) {
@@ -94,4 +92,5 @@ uint8_t login() {
         fb_puts("Wrong password!\n");
         return login();
     }
+   return 0;
 }

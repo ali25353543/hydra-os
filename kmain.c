@@ -12,7 +12,7 @@
 
 void kmain(unsigned int ebx)
 {
-    serial_configure_baud_rate(SERIAL_COM1_BASE, 3);
+    serial_configure_baud_rate(SERIAL_COM1_BASE, 12);
     serial_configure_fifo_buffer(SERIAL_COM1_BASE);
     serial_configure_line(SERIAL_COM1_BASE);
     serial_configure_modem(SERIAL_COM1_BASE);
@@ -38,13 +38,13 @@ void kmain(unsigned int ebx)
         serial_write("Jumping to module...\n");
         
         // 2. تحديث الـ typedef ليقبل مؤشرات الدوال كمعاملات (Arguments)
-        typedef void (*call_module_t)(int(*)(char *), void (*)(char *));
+        typedef void (*call_module_t)(void);
         
         // 3. تحويل العنوان إلى مؤشر الدالة الجديد
         call_module_t start = (call_module_t) module_start_address;
         
         // 4. الاستدعاء الآن سيمر بدون أخطاء تجميع
-        start(serial_write, fb_puts);
+        start();
 
     // تأكد من أن السلسلة صحيحة
  // تهيئة المستخدمين
