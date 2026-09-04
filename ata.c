@@ -13,6 +13,7 @@ void ata_init() {
 }
 
 void ata_identify() {
+    while ((inb(0x1F7) & 0x80) != 0);
     ata_init();
 // --- 2. إرسال أمر IDENTIFY ---
     outb(0x1F6, 0xA0); // اختيار Master

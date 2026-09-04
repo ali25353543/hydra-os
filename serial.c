@@ -86,12 +86,16 @@ int serial_is_transmit_fifo_empty(unsigned int com)
  */
 int serial_write(char *buf)
 {
-    unsigned int i = 0;
+    int i = 0;
     while (buf[i] != 0)
     {
+	if (buf[i] == '\r') {
+        	while (serial_is_transmit_fifo_empty(SERIAL_COM1_BASE) == 0);
+        	outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), 10);
+    	}
         while (serial_is_transmit_fifo_empty(SERIAL_COM1_BASE) == 0);
         outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), buf[i]);
         i++;
     }
-    return 0;
+    return i;
 }

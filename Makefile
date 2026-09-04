@@ -11,7 +11,7 @@ ASFLAGS = -f elf
 all: kernel.elf $(MODULES)
 
 kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf #-$$(date +%d-%m-%C%g)
 
 hydra.img: kernel.elf
 	qemu-img create -f raw hydra.img 5G

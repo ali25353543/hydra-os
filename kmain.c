@@ -65,7 +65,7 @@ login();
 
     shell_init();
 
-    ata_identify();
+    fb_puts((char *)ata_read_sector(0));
     while (1)
     {
         shell_update();
