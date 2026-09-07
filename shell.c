@@ -145,7 +145,7 @@ int shell_execute_command(char *buf)
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "type") == 0) {
-        fb_puts(tar_read(tar_ramdisk_start, args));
+        fb_puts(tar_read(tar_ramdisk_start, args) ? tar_read(tar_ramdisk_start, args) : "");
         fb_putc('\n');
         buffer_index = 0;
         fb_puts(prompt);

@@ -77,5 +77,11 @@ char *tar_read(char *tar_file, char *file_name)
             size = (size << 3) + (tar_header.size_raw[i] - '0');
         }
     }
+    if (tar_header.type[0] - '0' == 5) {
+        fb_puts("Error: ");
+        fb_puts(file_name);
+        fb_puts(" is a directory.\n");
+        return (char *)NULL;
+    }
     return tar_file + 512;
 }
