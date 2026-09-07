@@ -42,7 +42,7 @@ static uint8_t check_password(char *password) {
     return 255; // لم يتم العثور
 }
 
-uint8_t login() {
+char *login() {
     char name[MAX_USER_NAME_LENGTH];
     char password[MAX_USER_PASSWORD_LENGTH];
     uint8_t i = 0;
@@ -87,10 +87,10 @@ uint8_t login() {
     // التحقق من كلمة المرور
     if (check_password(password) == 0) {
         fb_puts("Login successful!\n");
-        return 0;
+        return users[user_index].name;
     } else {
         fb_puts("Wrong password!\n");
         return login();
     }
-   return 0;
+   return NULL;
 }

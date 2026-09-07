@@ -55,14 +55,16 @@ void delay(unsigned int count) {
 }
 
 /* Integer to string conversion */
-void int_to_str(int num, char *str) {
+char *int_to_str(int num)
+{
+    char *str = "";
     int i = 0;
     int is_negative = 0;
     
     if (num == 0) {
         str[0] = '0';
         str[1] = '\0';
-        return;
+        return str;
     }
     
     if (num < 0) {
@@ -91,9 +93,10 @@ void int_to_str(int num, char *str) {
         start++;
         end--;
     }
+    return str;
 }
-
-int str_to_int(const char *str) {
+int str_to_int(const char *str)
+{
     int result = 0;
     int sign = 1;
     
@@ -266,7 +269,9 @@ void update_score(void) {
     }
     
     /* Write new score */
-    int_to_str(score, score_str);
+    for (int i = 0; i < 20; i++) {
+        score_str[i] = int_to_str(score)[i];
+    }
     i = 0;
     while (score_str[i] != '\0') {
         fb[(1 * 80 + 7 + i) * 2] = score_str[i];
@@ -438,7 +443,10 @@ int snake_game(void) {
             fb_puts("Final Score: ");
             
             char score_str[20];
-            int_to_str(score, score_str);
+            for (int i = 0; i < 20; i++)
+            {
+                score_str[i] = int_to_str(score)[i];
+            }
             fb_puts(score_str);
             fb_puts("\n\nPress any key to restart or Q to quit...\n");
             

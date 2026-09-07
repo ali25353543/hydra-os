@@ -7,7 +7,7 @@
  */
 int snake_game(void);
 
-void int_to_str(int num, char *str);
+char *int_to_str(int num);
 
 int str_to_int(const char *str);
 

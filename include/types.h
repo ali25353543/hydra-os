@@ -20,5 +20,7 @@ int strncmp(const char *s1, const char *s2, unsigned int n);
 int strcopy(const char *src, char *dist);
 char* strchar(char *str, char ch);
 char* strstring(char *haystack, char *needle);
+char *int_to_str(int num);
+int str_to_int(const char *str);
 
 #endif //INCLUDE_TYPES_H

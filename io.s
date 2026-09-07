@@ -28,3 +28,12 @@ outw:
     mov dx, [esp + 4]
     out dx, ax
     ret
+inl:
+    mov dx, [esp + 4]
+    in eax, dx
+    ret
+outl:
+    mov eax, [esp + 8]
+    mov dx, [esp + 4]
+    out dx, eax
+    ret

@@ -1,14 +1,16 @@
 OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o \
-beep.o string.o ata.o fat32.o users.o
-MODULES = prog.bin
+beep.o string.o ata.o fat32.o users.o tar.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
          -nostartfiles -nodefaultlibs -fno-pic -fno-pie -Wall -Wextra -Werror -I ./include -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
+MODULES_SRC = $(wildcard modules/*.s)
+MODULES_BIN = $(patsubst modules/%.s, modules/%.bin, \
+$(MODULES_SRC))
 
-all: kernel.elf $(MODULES)
+all: kernel.elf modules.tar
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf #-$$(date +%d-%m-%C%g)
@@ -25,7 +27,7 @@ hydra.img: kernel.elf
 	sudo mount $$LOOP"p1" /mnt/hydra ; \
 	sudo grub-install --target=i386-pc --boot-directory=/mnt/hydra/boot --force $$LOOP ; \
 	sudo mkdir -p /mnt/hydra/modules ; \
-	sudo cp ./*.bin /mnt/hydra/modules/ ; \
+	sudo cp ./modules.tar /mnt/hydra/modules/ ; \
 	sudo cp ./users.txt /mnt/hydra/modules/ ; \
 	sudo cp ./kernel.elf /mnt/hydra/boot/kernel.elf ; \
 	sudo cp ./grub.cfg /mnt/hydra/boot/grub/grub.cfg ; \
@@ -57,8 +59,11 @@ idt_s.o: idt_asm.s
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
 
-%.bin: ./modules/%.s
+modules/%.bin: modules/%.s
 	nasm -f bin $< -o $@
+
+modules.tar: $(MODULES_BIN)
+	tar -cf modules.tar modules/*
 
 real_dev:
 	@echo "device letter" ; \
@@ -72,11 +77,11 @@ real_dev:
 	sudo grub-install --target=i386-pc --boot-directory=/mnt/hydra/boot --force /dev/sd"$$letter" ; \
 	make ; \
 	sudo cp kernel.elf /mnt/hydra/boot/kernel.elf ; \
-	sudo cp *.bin /mnt/hydra/boot/modules/ ; \
+	sudo cp modules.tar /mnt/hydra/boot/modules/modules.tar ; \
 	sudo cp grub.cfg /mnt/hydra/boot/grub/grub.cfg ; \
 	sudo umount -l /dev/sd"$$letter$$num" ; \
 	rm *.o kernel.elf *.bin
 
 clean:
-	rm -rf *.o kernel.elf *.bin modules/*.o 
+	rm -rf *.o kernel.elf modules/*.bin modules.tar hydra.img
 	sudo rm -rf /mnt/hydra

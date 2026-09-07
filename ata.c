@@ -3,7 +3,8 @@
 #include <fb.h>
 static unsigned short sector[256];
 
-void ata_init() {
+void ata_init()
+{
     outb(0x3F6, 0x04); // تفعيل الـ Reset
 // تأخير بسيط (يمكنك استخدام قراءة السجل كمؤقت)
     inb(0x3F6); inb(0x3F6); inb(0x3F6); inb(0x3F6); 
@@ -14,7 +15,6 @@ void ata_init() {
 
 void ata_identify() {
     while ((inb(0x1F7) & 0x80) != 0);
-    ata_init();
 // --- 2. إرسال أمر IDENTIFY ---
     outb(0x1F6, 0xA0); // اختيار Master
     outb(0x1F1, 0x00); // تصفير سجل الميزات (مهم)
@@ -59,7 +59,6 @@ void ata_identify() {
 unsigned short *ata_read_sector(unsigned long long sector_num) {
     // 1. الانتظار حتى يصبح القرص غير مشغول (BSY == 0)
     while ((inb(0x1F7) & 0x80) != 0);
-    ata_init();
     // 2. إرسال سجل المحرك (Drive Select)
     // في نمط LBA 48، نرسل القيمة 0x40 فقط في البت السادس لتفعيل LBA والـ Master
     // (لا ندمج أي بتات من عنوان القطاع في هذا المنفذ كما كنا نفعل في LBA 28)
@@ -102,7 +101,6 @@ unsigned short *ata_read_sector(unsigned long long sector_num) {
 void ata_write_sector(unsigned long long sector_num, unsigned short *sector_contect) {
     // 1. الانتظار حتى يصبح القرص غير مشغول (BSY == 0)
     while ((inb(0x1F7) & 0x80) != 0);
-    ata_init();
 
     // 2. إرسال سجل المحرك (Drive Select)
     // في نمط LBA 48، نرسل القيمة 0x40 فقط في البت السادس لتفعيل LBA والـ Master
@@ -133,7 +131,7 @@ void ata_write_sector(unsigned long long sector_num, unsigned short *sector_cont
 
     // 6. الانتظار (Polling) حتى تجهز البيانات
     while ((inb(0x1F7) & 0x80) != 0); // انتظر اختفاء Busy
-    //while ((inb(0x1F7) & 0x08) == 0); // انتظر ظهور DRQ (طلب البيانات)
+    while ((inb(0x1F7) & 0x08) == 0); // انتظر ظهور DRQ (طلب البيانات)
 
     // 7. قراءة الـ 512 بايت (256 كلمة) من منفذ البيانات
     for (int i = 0; i < 256; i++) {

@@ -31,4 +31,6 @@ unsigned short *ata_read_sector(unsigned long long sector_num);
 
 void ata_write_sector(unsigned long long sector_num, unsigned short *sector_contect);
 
+void ata_init();
+
 #endif

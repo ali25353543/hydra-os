@@ -4,7 +4,7 @@
 /** shell_init:
  *  Initializes the shell
  */
-void shell_init(void);
+void shell_init(char *username, char *tar_start);
 
 /** shell_update:
  *  Updates the shell (call this in main loop)

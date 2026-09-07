@@ -7,13 +7,15 @@
 #include <multiboot.h>
 #include <types.h>
 #include <users.h>
+#include <tar.h>
 
 #define COMMAND_BUFFER_SIZE 256
 
 static char command_buffer[COMMAND_BUFFER_SIZE];
 static unsigned int buffer_index = 0;
-static char *prompt = "> ";
+static char *prompt = NULL;
 static int state = 0;
+static char *tar_ramdisk_start = NULL;
 
 /** shell_clear_command:
  *  Clears the screen
@@ -138,6 +140,15 @@ int shell_execute_command(char *buf)
         beep(int_freq,int_duration);
         buffer_index = 0;
         fb_puts(prompt);
+    } else if (strcmp(cmd, "dir") == 0) {
+        tar_info(tar_ramdisk_start);
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(cmd, "type") == 0) {
+        fb_puts(tar_read(tar_ramdisk_start, args));
+        fb_putc('\n');
+        buffer_index = 0;
+        fb_puts(prompt);
     } else {
         /* we’ll never get here, unless the module code returns */
         fb_puts("Unknown command: ");
@@ -155,9 +166,14 @@ int shell_execute_command(char *buf)
 /** shell_init:
  *  Initializes the shell
  */
-void shell_init(void)
+void shell_init(char *username, char *tar_start)
 {
     buffer_index = 0;
+    prompt = username;
+    state = 0;
+    tar_ramdisk_start = tar_start;
+    prompt[strlen(username)] = '>';
+    prompt[strlen(username) + 1] = ' ';
     fb_puts("Welcome to Hydra OS!\n");
     fb_puts("Type 'help' for available commands.\n\n");
     fb_puts(prompt);
