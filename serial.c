@@ -89,9 +89,9 @@ int serial_write(char *buf)
     int i = 0;
     while (buf[i] != 0)
     {
-	if (buf[i] == '\r') {
+	if (buf[i] == '\n') {
         	while (serial_is_transmit_fifo_empty(SERIAL_COM1_BASE) == 0);
-        	outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), 10);
+        	outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), 13);
     	}
         while (serial_is_transmit_fifo_empty(SERIAL_COM1_BASE) == 0);
         outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), buf[i]);

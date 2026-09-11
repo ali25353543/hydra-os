@@ -105,3 +105,4 @@ no_error_code_interrupt_handler 44
 no_error_code_interrupt_handler 45
 no_error_code_interrupt_handler 46
 no_error_code_interrupt_handler 47
+no_error_code_interrupt_handler 128

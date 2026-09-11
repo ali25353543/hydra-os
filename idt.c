@@ -1,3 +1,4 @@
+#include <fb.h>
 #include <idt.h>
 #include <io.h>
 #include <serial.h>
@@ -155,7 +156,7 @@ void idt_install(void)
     idt_set_gate(45, interrupt_handler_45, 0x08, 0x8E);
     idt_set_gate(46, interrupt_handler_46, 0x08, 0x8E);
     idt_set_gate(47, interrupt_handler_47, 0x08, 0x8E);
-
+    idt_set_gate(128, interrupt_handler_128, 0x08, 0xEE);
     /* Remap the PIC */
     pic_remap(0x20, 0x28);
 
@@ -206,6 +207,9 @@ void interrupt_handler_main(unsigned int *regs)
         pic_acknowledge(interrupt);
     } else if (interrupt == 0) {
         serial_write("#DE\n");
+        pic_acknowledge(interrupt);
+    } else if (interrupt == 128) {
+        fb_clear();
         pic_acknowledge(interrupt);
     } else {
         pic_acknowledge(interrupt);

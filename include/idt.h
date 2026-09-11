@@ -62,6 +62,7 @@ void interrupt_handler_44(void);
 void interrupt_handler_45(void);
 void interrupt_handler_46(void);
 void interrupt_handler_47(void);
+void interrupt_handler_128(void);
 void interrupt_handler_main(unsigned int *esp);
 
 

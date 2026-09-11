@@ -149,6 +149,25 @@ int shell_execute_command(char *buf)
         fb_putc('\n');
         buffer_index = 0;
         fb_puts(prompt);
+    } else if (strcmp(cmd, "touch") == 0) {
+        tar_create(tar_ramdisk_start, args, 0) ? fb_puts("File created successfully.\n") : fb_puts("\n");
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(cmd, "exec") == 0 && args[0] != '\0') {
+        int argv[100] = {0,0,0,0};
+        exec(tar_ramdisk_start, args, argv) ? fb_puts("File executed successfully.\n") : fb_puts("\n");
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(cmd, "psfedit") == 0) {
+        int psfedit(char *psf_file);
+        psfedit("df");
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strncmp(args, " . ", 3) == 0) {
+        char *data = args + 3; // Skip the " > " part
+        tar_write(tar_ramdisk_start, cmd, data, strlen(data)) ? fb_puts("File written successfully.\n") : fb_puts("\n");
+        buffer_index = 0;
+        fb_puts(prompt);
     } else {
         /* we’ll never get here, unless the module code returns */
         fb_puts("Unknown command: ");

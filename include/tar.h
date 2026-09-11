@@ -6,7 +6,7 @@ typedef struct {
     char size_raw[12];
     char mtime[12];
     char chksum[8];
-    char type[1];
+    char type;
     char linkname[100];
     char special_text[6];
     char version[2];
@@ -16,8 +16,14 @@ typedef struct {
     char devminor[8];
     char prefix[155];
     char reserved[12];
-} tar_header_t;
+} __attribute__((packed)) tar_header_t;
 
 void tar_info(char *tar_file);
 
 char *tar_read(char *tar_file, char *file_name);
+
+int tar_create(char *tar_file, char *file_name, unsigned int alloc_size);
+
+int tar_write(char *tar_file, char *file_name, char *data, unsigned int data_size);
+
+int exec(char *tar_file, char *file_name, int *args);

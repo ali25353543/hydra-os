@@ -1,5 +1,5 @@
 OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o \
-beep.o string.o ata.o fat32.o users.o tar.o
+beep.o string.o ata.o fat32.o users.o tar.o font.o psfedit.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
          -nostartfiles -nodefaultlibs -fno-pic -fno-pie -Wall -Wextra -Werror -I ./include -c
@@ -38,7 +38,7 @@ hydra.img: kernel.elf
 run_qemu: hydra.img
 	rm com1.out ; \
 	touch com1.out ; \
-	sudo qemu-system-i386 -drive file=./hydra.img,format=raw,cache=none -serial file:com1.out -m 2G #-audiodev driver=pipewire,id=snd0
+	sudo qemu-system-i386 -vga std -drive file=./hydra.img,format=raw,cache=none -serial file:com1.out -m 2G #-audiodev driver=pipewire,id=snd0
 
 run_bochs: hydra.img
 	rm bochslog.txt ; \
