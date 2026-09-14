@@ -1,5 +1,5 @@
 OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o \
-beep.o string.o ata.o fat32.o users.o tar.o font.o psfedit.o
+beep.o string.o ata.o fat32.o users.o tar.o font.o psfedit.o vars.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
          -nostartfiles -nodefaultlibs -fno-pic -fno-pie -Wall -Wextra -Werror -I ./include -c
@@ -63,7 +63,10 @@ modules/%.bin: modules/%.s
 	nasm -f bin $< -o $@
 
 modules.tar: $(MODULES_BIN)
-	tar -cf modules.tar modules/*
+	cd modules ; \
+	tar -cf modules.tar * ; \
+	mv modules.tar ../ ; \
+	cd ..
 
 real_dev:
 	@echo "device letter" ; \

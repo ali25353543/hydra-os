@@ -48,7 +48,7 @@ Hydra OS is a monolithic kernel written in x86 Assembly and C. It implements the
 * **Keyboard driver:** scan code reading, character translation, and input dispatching.
 * **ATA driver:** sector reading, sector writing, ATA type identifier.
 * **PIC controller:** remapping and acknowledgment handling.
-* **Port I/O utilities:** `inb`, `outb`, `inw`, `outw` for working with hardware ports.
+* **Port I/O utilities:** `inb`, `outb`, `inw`, `outw`, `inl`, `outl` for working with hardware ports.
 
 ### Shell
 
@@ -59,7 +59,8 @@ A simple terminal that supports:
 * `echo` – print text
 * `about` – kernel/build information
 * `play` – launch Snake game
-
+* `touch` – create file in TARRD (Tape ARchive RAM Disk)
+* `type` – show content of file
 ### Snake Game
 
 A framebuffer‑rendered implementation of the classic Snake game:

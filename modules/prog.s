@@ -1,6 +1,11 @@
-db 'Hydra OS', 0
-dd 0x00100000
+bits 32
+org 0x01000000
+
+jmp entry
+
 entry:
-    mov eax, 0
-    sub eax, 1
-    ret
+    mov eax, 1
+    mov ebx, 0
+    int 0x80
+
+text db 'H', 0

@@ -18,12 +18,14 @@ typedef struct {
     char reserved[12];
 } __attribute__((packed)) tar_header_t;
 
-void tar_info(char *tar_file);
+void tar_init(char *tar_start);
 
-char *tar_read(char *tar_file, char *file_name);
+void tar_info();
 
-int tar_create(char *tar_file, char *file_name, unsigned int alloc_size);
+char *tar_read(char *file_name);
 
-int tar_write(char *tar_file, char *file_name, char *data, unsigned int data_size);
+int tar_create(char *file_name, unsigned int alloc_size);
 
-int exec(char *tar_file, char *file_name, int *args);
+int tar_write(char *file_name, char *data, unsigned int data_size);
+
+int exec(char *file_name, int *args);

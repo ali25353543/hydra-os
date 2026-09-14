@@ -1,7 +1,10 @@
+#include <keyboard.h>
 #include <fb.h>
 #include <idt.h>
 #include <io.h>
 #include <serial.h>
+#include <types.h>
+
 
 /* Forward declaration */
 void keyboard_handle_interrupt(unsigned char scan_code);
@@ -156,7 +159,7 @@ void idt_install(void)
     idt_set_gate(45, interrupt_handler_45, 0x08, 0x8E);
     idt_set_gate(46, interrupt_handler_46, 0x08, 0x8E);
     idt_set_gate(47, interrupt_handler_47, 0x08, 0x8E);
-    idt_set_gate(128, interrupt_handler_128, 0x08, 0xEE);
+    idt_set_gate(128, interrupt_handler_128, 0x08, 0x8F);
     /* Remap the PIC */
     pic_remap(0x20, 0x28);
 
@@ -164,28 +167,49 @@ void idt_install(void)
     load_idt((unsigned int *)&ip);
 }
 
+typedef struct {
+    unsigned int gs, fs, es, ds;
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    unsigned int int_no, err_code;
+    unsigned int eip, cs, eflags;
+} __attribute__((packed)) regs_t;
+
 /** interrupt_handler_main:
  *  C function called by the common interrupt handler
  */
+
+/*
+void fb_puts_hex(unsigned int val) {
+    char hex[] = "0123456789ABCDEF";
+    char buf[11];
+    buf[0] = '0';
+    buf[1] = 'x';
+    for (int i = 0; i < 8; i++) {
+        buf[2 + i] = hex[(val >> (28 - i * 4)) & 0xF];
+    }
+    buf[10] = 0;
+    fb_puts(buf);
+}
+*/
+
 void interrupt_handler_main(unsigned int *regs)
 {
     
     // Stack layout when we get here:
     // regs points to the top of the stack after we pushed esp
     // Working backwards from there:
-    // regs[0] points to: [gs][fs][es][ds][edi][esi][ebp][esp][ebx][edx][ecx][eax][int_no][err_code]
+    // regs[0] points to: [gs][fs][es][ds][edi][esi][ebp][eax][ebx][edx][ecx][esp][int_no][err_code]
     
     // Since regs IS the stack pointer we saved, we can access directly:
     // After pusha (8 registers), then ds, es, fs, gs (4 more) = 12 total
     // Then int_no and error_code are pushed BEFORE all that
     
     // Let's access from the saved stack pointer
-    unsigned int *stack_ptr = regs;
+    regs_t *stack_ptr = (regs_t *)regs;
     
     // Skip: gs(0), fs(1), es(2), ds(3), and 8 pusha registers = 12 total
-    unsigned int interrupt = stack_ptr[12];  // interrupt number
-    unsigned int error_code = stack_ptr[13]; // error code
-
+    unsigned int interrupt = stack_ptr->int_no;  // interrupt number
+    unsigned int error_code = stack_ptr->err_code; // error code
     serial_write("INT NUM: ");
     char buf[2];
     buf[0] = '0' + (interrupt / 10);
@@ -209,7 +233,12 @@ void interrupt_handler_main(unsigned int *regs)
         serial_write("#DE\n");
         pic_acknowledge(interrupt);
     } else if (interrupt == 128) {
-        fb_clear();
+        if (stack_ptr->eax == 0)
+        {
+            fb_puts((char *)stack_ptr->ebx);
+        } else if (stack_ptr->eax == 1) {
+            stack_ptr->eax = stack_ptr->ebx;
+        }
         pic_acknowledge(interrupt);
     } else {
         pic_acknowledge(interrupt);

@@ -4,10 +4,10 @@
 #include <serial.h>
 #include <snake.h>
 #include <beep.h>
-#include <multiboot.h>
 #include <types.h>
 #include <users.h>
 #include <tar.h>
+#include <vars.h>
 
 #define COMMAND_BUFFER_SIZE 256
 
@@ -15,7 +15,6 @@ static char command_buffer[COMMAND_BUFFER_SIZE];
 static unsigned int buffer_index = 0;
 static char *prompt = NULL;
 static int state = 0;
-static char *tar_ramdisk_start = NULL;
 
 /** shell_clear_command:
  *  Clears the screen
@@ -141,21 +140,20 @@ int shell_execute_command(char *buf)
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "dir") == 0) {
-        tar_info(tar_ramdisk_start);
+        tar_info();
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "type") == 0) {
-        fb_puts(tar_read(tar_ramdisk_start, args) ? tar_read(tar_ramdisk_start, args) : "");
-        fb_putc('\n');
+        fb_puts(tar_read(args) ? tar_read(args) : "\n");
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "touch") == 0) {
-        tar_create(tar_ramdisk_start, args, 0) ? fb_puts("File created successfully.\n") : fb_puts("\n");
+        tar_create(args, 0) ? fb_puts("File created successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "exec") == 0 && args[0] != '\0') {
-        int argv[100] = {0,0,0,0};
-        exec(tar_ramdisk_start, args, argv) ? fb_puts("File executed successfully.\n") : fb_puts("\n");
+        int argv[] = {0,0,0,0};
+        exec(args, argv) ? fb_puts("File executed successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "psfedit") == 0) {
@@ -163,9 +161,31 @@ int shell_execute_command(char *buf)
         psfedit("df");
         buffer_index = 0;
         fb_puts(prompt);
+    } else if (strcmp(cmd, "set") == 0) {
+        if (args[0] == 0) {
+            extern vars_t vars[64];
+            for (unsigned char i = 0; i < 64; i++)
+            {
+                fb_puts(vars[i].name);
+                fb_putc('=');
+                fb_puts(int_to_str(vars[i].value));
+                fb_putc('\n');
+                for (unsigned int j = 0; j < 1000000; j++);
+            }
+        } else {
+            char **parts = strsplit(args, '=');
+            set(parts[0], str_to_int(parts[1]));
+        }
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(cmd, "get") == 0) {
+        fb_puts(int_to_str(get(args)));
+        fb_putc('\n');
+        buffer_index = 0;
+        fb_puts(prompt);
     } else if (strncmp(args, " . ", 3) == 0) {
         char *data = args + 3; // Skip the " > " part
-        tar_write(tar_ramdisk_start, cmd, data, strlen(data)) ? fb_puts("File written successfully.\n") : fb_puts("\n");
+        tar_write(cmd, data, strlen(data)) ? fb_puts("File written successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
     } else {
@@ -185,12 +205,11 @@ int shell_execute_command(char *buf)
 /** shell_init:
  *  Initializes the shell
  */
-void shell_init(char *username, char *tar_start)
+void shell_init(char *username)
 {
     buffer_index = 0;
     prompt = username;
     state = 0;
-    tar_ramdisk_start = tar_start;
     prompt[strlen(username)] = '>';
     prompt[strlen(username) + 1] = ' ';
     fb_puts("Welcome to Hydra OS!\n");

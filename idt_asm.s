@@ -10,8 +10,8 @@ load_idt:
 global interrupt_handler_%1
 interrupt_handler_%1:
     cli
-    push byte 0                     ; push dummy error code
-    push byte %1                    ; push interrupt number
+    push dword 0                     ; push dummy error code
+    push dword %1                    ; push interrupt number
     jmp common_interrupt_handler
 %endmacro
 
@@ -19,11 +19,18 @@ interrupt_handler_%1:
 global interrupt_handler_%1
 interrupt_handler_%1:
     cli
-    push byte %1                    ; push interrupt number
+    push dword %1                    ; push interrupt number
     jmp common_interrupt_handler
 %endmacro
 
 common_interrupt_handler:
+    ;push edi
+    ;push esi
+    ;push ebp
+    ;push esp
+    ;push ebx
+    ;push edx
+    ;push eax
     pusha                           ; Push all general purpose registers
     
     push ds

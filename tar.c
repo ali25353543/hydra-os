@@ -4,8 +4,15 @@
 
 static tar_header_t tar_header = {0};
 
-void tar_info(char *tar_file)
+static char *tar_disk_start = NULL;
+
+void tar_init(char *tar_start) {
+    tar_disk_start = tar_start;
+}
+
+void tar_info()
 {
+    char *tar_file = tar_disk_start;
     while (tar_file[0] != '\0')
     {
     tar_header = *(tar_header_t *)tar_file;
@@ -42,48 +49,35 @@ void tar_info(char *tar_file)
     }
 }
 
-char *tar_read(char *tar_file, char *file_name)
-{
-    tar_header_t tar_header = *(tar_header_t *)tar_file;
-    unsigned int size = 0;
-    while (tar_file[0] != '\0' && strcmp(tar_header.name, file_name) != 0){
-        for (unsigned char i = 0; i < 11; i++)
-        {
-            // 1. تخطي المسافات أو الأصفار الممتلئة في البداية والنهاية
-            if (tar_header.size_raw[i] == ' ' || tar_header.size_raw[i] == '\0') {
-                continue; 
+char *tar_read(char *file_name) {
+    char *tar_file = tar_disk_start;
+    tar_header_t *header = (tar_header_t *)tar_file;
+    
+    while (tar_file[0] != '\0') {
+        if (strcmp(header->name, file_name) == 0) {
+            // وجدنا الملف
+            unsigned int size = 0;
+            for (int i = 0; i < 11; i++) {
+                if (header->size_raw[i] >= '0' && header->size_raw[i] <= '7') {
+                    size = (size << 3) + (header->size_raw[i] - '0');
+                }
             }
-
-            // 2. التحقق من أن الحرف هو رقم ثماني صالح (بين '0' و '7')
-            if (tar_header.size_raw[i] >= '0' && tar_header.size_raw[i] <= '7') {
-                // إزاحة المجموع الحالي (الضرب في 8) ثم إضافة القيمة الرقمية الجديدة
-                size = (size << 3) + (tar_header.size_raw[i] - '0');
+            if (header->type == '5') {  // دليل
+                return NULL;
+            }
+            return tar_file + 512;  // بيانات الملف
+        }
+        // لم نجده، اقفز للملف التالي
+        unsigned int size = 0;
+        for (int i = 0; i < 11; i++) {
+            if (header->size_raw[i] >= '0' && header->size_raw[i] <= '7') {
+                size = (size << 3) + (header->size_raw[i] - '0');
             }
         }
-        tar_file += (512 + size + 511) & ~511;
-        tar_header = *(tar_header_t *)tar_file;
+        tar_file += 512 + ((size + 511) & ~511);
+        header = (tar_header_t *)tar_file;
     }
-    size = 0;
-    for (unsigned char i = 0; i < 11; i++)
-        {
-            // 1. تخطي المسافات أو الأصفار الممتلئة في البداية والنهاية
-            if (tar_header.size_raw[i] == ' ' || tar_header.size_raw[i] == '\0') {
-                continue; 
-            }
-
-            // 2. التحقق من أن الحرف هو رقم ثماني صالح (بين '0' و '7')
-        if (tar_header.size_raw[i] >= '0' && tar_header.size_raw[i] <= '7') {
-            // إزاحة المجموع الحالي (الضرب في 8) ثم إضافة القيمة الرقمية الجديدة
-            size = (size << 3) + (tar_header.size_raw[i] - '0');
-        }
-    }
-    if (tar_header.type - '0' == 5) {
-        fb_puts("Error: ");
-        fb_puts(file_name);
-        fb_puts(" is a directory.\n");
-        return (char *)NULL;
-    }
-    return tar_file + 512;
+    return NULL;
 }
 
 // دالة مساعدة لتحويل الرقم العشري إلى نص ثماني متوافق مع TAR
@@ -104,25 +98,35 @@ void int_to_octal(unsigned int num, char *out_str, int size) {
 }
 
 // دالة مساعدة موحدة لقراءة الحجم من الهيدر (لتجنب تكرار الكود)
-unsigned int get_tar_size(char *tar_file, char *file_name) {
-    unsigned int size = 0;
-    while (tar_file[0] != 0 && strcmp(tar_file, file_name) != 0)
-    {
-        tar_header = *(tar_header_t *)tar_file;
-    for (unsigned char i = 0; i < 11; i++) {
-        if (header->size_raw[i] == ' ' || header->size_raw[i] == '\0') {
-            continue; 
+unsigned int get_tar_size(char *file_name) {
+    char *tar_file = tar_disk_start;
+    tar_header_t *header = (tar_header_t *)tar_file;
+    
+    while (tar_file[0] != '\0') {
+        if (strcmp(header->name, file_name) == 0) {
+            unsigned int size = 0;
+            for (int i = 0; i < 11; i++) {
+                if (header->size_raw[i] >= '0' && header->size_raw[i] <= '7') {
+                    size = (size << 3) + (header->size_raw[i] - '0');
+                }
+            }
+            return size;
         }
-        if (header->size_raw[i] >= '0' && header->size_raw[i] <= '7') {
-            size = (size << 3) + (header->size_raw[i] - '0');
+        unsigned int size = 0;
+        for (int i = 0; i < 11; i++) {
+            if (header->size_raw[i] >= '0' && header->size_raw[i] <= '7') {
+                size = (size << 3) + (header->size_raw[i] - '0');
+            }
         }
+        tar_file += 512 + ((size + 511) & ~511);
+        header = (tar_header_t *)tar_file;
     }
-    }
-    return size;
+    return 0;
 }
 
-int tar_create(char *tar_file, char *file_name, unsigned int alloc_size)
+int tar_create(char *file_name, unsigned int alloc_size)
 {
+    char *tar_file = tar_disk_start;
     // 1. البحث عن نهاية الملفات الحالية والوصول لكتلة الأصفار
     while (tar_file[0] != '\0')
     {
@@ -134,7 +138,7 @@ int tar_create(char *tar_file, char *file_name, unsigned int alloc_size)
             fb_puts(" already exists in the tar file.\n");
             return -1;
         }
-        unsigned int size = get_tar_size(tar_header); // الدالة المساعدة لحساب الحجم
+        unsigned int size = get_tar_size(file_name); // الدالة المساعدة لحساب الحجم
         tar_file += 512 + ((size + 511) & ~511);
     }
 
@@ -188,8 +192,9 @@ int tar_create(char *tar_file, char *file_name, unsigned int alloc_size)
     return 0;
 }
 
-int tar_write(char *tar_file, char *file_name, char *data, unsigned int data_size)
+int tar_write(char *file_name, char *data, unsigned int data_size)
 {
+    char *tar_file = tar_disk_start;
     // نضمن أن المؤشر يبدأ من أول الأرشيف ويتحرك بايت ببايت
     while (tar_file[0] != '\0')
     {
@@ -198,7 +203,7 @@ int tar_write(char *tar_file, char *file_name, char *data, unsigned int data_siz
         // هل هذا هو الملف المطلوب؟
         if (strcmp(current_header->name, file_name) == 0)
         {
-            unsigned int allocated_size = get_tar_size(current_header);
+            unsigned int allocated_size = get_tar_size(file_name);
             
             // التحقق من أن حجم البيانات المكتوبة لا يتخطى المساحة المحجوزة في الـ create
             /*
@@ -232,7 +237,7 @@ int tar_write(char *tar_file, char *file_name, char *data, unsigned int data_siz
         }
 
         // إذا لم يكن الملف المطلوب، نقفز للملف التالي بناءً على حجمه
-        unsigned int size = get_tar_size(current_header);
+        unsigned int size = get_tar_size(file_name);
         tar_file += 512 + ((size + 511) & ~511);
     }
     
@@ -242,35 +247,30 @@ int tar_write(char *tar_file, char *file_name, char *data, unsigned int data_siz
     return -1;
 }
 
-int exec(char *tar_file, char *file_name, int *args)
+int exec(char *file_name, int *args)
 {
-    char *file_data = tar_read(tar_file, file_name);
-    if (file_data == NULL) {
-        fb_puts("Error: Unable to read the file for execution.\n");
-        return -1;
-    }
-    char *data = file_data;
-    // Assuming the file is a binary executable, we would typically jump to its entry point.
-    // However, in this context, we will just print a message indicating execution.
-    fb_puts("Executing ");
-    fb_puts(file_name);
-    fb_puts("...\n");
-    if (strncmp(file_data, "Hydra OS", 8) != 0) {
-        fb_puts("Invalid Hydra OS program.\n");
-        return -1;
-    }
-    file_data += 9; // Skip the "Hydra OS" signature
-    unsigned int size = get_tar_size((tar_header_t *)(tar_file));
-    unsigned int address = (unsigned int)file_data;
-    file_data += 4; // Skip the size field
-    if (address < 0x40000000) {
-        fb_puts("Error: Invalid execution address.\n");
-        return -1;
-    }
-    for (int i = 0; i < (int)size; i++)
-    {
-        ((char *)address)[i] = data[i];
-    }
-    ((void (*)(int *))address)(args); // Call the function pointer to execute the code
-    return 0; // Indicate success
+    char *file_data = tar_read(file_name);
+        if (file_data == NULL) {
+            fb_puts("Error: Unable to read the file for execution.\n");
+            return -1;
+        }
+        // Assuming the file is a binary executable, we would typically jump to its entry point.
+        // However, in this context, we will just print a message indicating execution.
+        //if (strncmp(file_data, "Hydra OS", 8) != 0) {
+        //    fb_puts("Invalid Hydra OS program.\n");
+        //    return -1;
+        //}
+        //file_data += 9; // Skip the "Hydra OS" signature
+        unsigned int size = get_tar_size(file_name);
+        unsigned int address = 0x01000000;//*(unsigned int *)file_data;
+        //file_data += 4; // Skip the size field
+        char *dest = (char *)address;
+        for (int i = 0; i < (int)size; i++)
+        {
+            dest[i] = file_data[i];
+        }
+        typedef int (*call_t)(int *);
+        call_t prog = (call_t) address;
+        prog(args); // Call the function pointer to execute the code
+        return 0; // Indicate success
 }
