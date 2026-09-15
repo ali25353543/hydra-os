@@ -54,13 +54,29 @@ Hydra OS is a monolithic kernel written in x86 Assembly and C. It implements the
 
 A simple terminal that supports:
 
+Basic Commands:
 * `help` – list commands
 * `clear` – reset framebuffer
 * `echo` – print text
 * `about` – kernel/build information
 * `play` – launch Snake game
+
+Extended Basic Commands:
+* `beep` – play beep in selected time
+
+File Commands:
 * `touch` – create file in TARRD (Tape ARchive RAM Disk)
 * `type` – show content of file
+* ` > (in args variable)` – write data (Variable cmd) to file
+
+Vriables Commands:
+* `set` – set EV (Environment Variable) to Value (Value must be INTEGER)
+* `get` – print EV value if EV is not set, else print '0'
+* `unset` – unset EV
+
+Advanced Commands:
+* `exec` – Execute program (Be careful, This programs can KILL system.)
+
 ### Snake Game
 
 A framebuffer‑rendered implementation of the classic Snake game:
@@ -78,28 +94,44 @@ loader.s                 # Bootloader entry (Multiboot), protected mode setup
 link.ld                  # Linker script controlling kernel memory layout
 kmain.c                  # Kernel main entry point
 
-fb.c / fb.h              # Framebuffer driver (text mode, VGA memory)
-idt.c / idt.h            # Interrupt Descriptor Table setup
+fb.c                     # Framebuffer driver (text mode, VGA memory)
+idt.c                    # Interrupt Descriptor Table setup
 idt_asm.s                # Low-level interrupt stubs
 
-gdt.c / gdt.h            # Global Descriptor Table
+gdt.c                    # Global Descriptor Table
 gdt_asm.s                # Assembly GDT loader
 
-io.s / io.h              # I/O port utilities (inb, outb)
-keyboard.c / keyboard.h  # PS/2 keyboard driver
-serial.c / serial.h      # Serial COM debugging output
+io.s                     # I/O port utilities (inb, outb)
+keyboard.c               # PS/2 keyboard driver
+serial.c                 # Serial COM debugging output
 
-shell.c / shell.h        # Minimal interactive shell
-snake.c / snake.h        # Snake game implementation
+shell.c                  # Minimal interactive shell
+snake.c                  # Snake game implementation
 
 images/                  # Repository images (banner, assets)
-iso/                     # Generated bootable ISO structure
-iso/boot/grub/           # GRUB menu configuration (menu.lst)
+include/                 # Include Directory
+modules/                 # TARRD Content
 
-Makefile                 # Build rules for compiling kernel & ISO
+
+Makefile                 # Build rules for compiling kernel & IMG
 bochsrc.txt              # Bochs emulator configuration
 bochslog.txt             # Bochs emulator logs
 com1.out                 # Serial console output logs
+
+font.c                   # VGA Text mode font loader
+ata.c                    # ATA PIO driver (Not working now on Real-Hardware)
+fat32.c                  # FAT32 driver (Same in ata.c)
+
+install                  # Installer wrote in Bash Script that Installs Hydra OS on real storange media (Must be on ATA mode)
+
+users.c                  # Simple console login
+
+tar.c                    # TARRD driver
+
+vars.c                   # EV table
+
+beep.s                   # Buzzer driver
+
 ```
 <br>
 

@@ -10,6 +10,7 @@
 #include <fat32.h>
 #include <users.h>
 #include <tar.h>
+#include <vars.h>
 
 void kmain(unsigned int ebx)
 {
@@ -20,7 +21,6 @@ void kmain(unsigned int ebx)
 
     idt_install();
     serial_write("IDT installed!\n");
-    int argv[] = {0x3F8, 12};
     //serial_configure_baud_rate(SERIAL_COM1_BASE, 12);
     //serial_configure_fifo_buffer(SERIAL_COM1_BASE);
     //serial_configure_line(SERIAL_COM1_BASE);
@@ -35,7 +35,7 @@ void kmain(unsigned int ebx)
     serial_write("Interrupts Enabled!\n");
 
     tar_init((char *)mod[0].mod_start);
-    exec("serial.bin", argv);
+    exec("serial.bin", "--com 1 --divisor 12");
     
     ata_init();
     serial_write("ATA installed!\n");
@@ -70,17 +70,6 @@ void kmain(unsigned int ebx)
         fb_putc(i);
     }
     fb_putc('\n');
-    extern user_t users[64];
-    // طباعة معلومات للتصحيح
-    fb_puts("Users initialized:\n");
-    for (uint8_t i = 0; i < 5; i++) {
-        fb_puts("User: ");
-        fb_puts(users[i].name);
-        fb_puts(" / Password: ");
-        fb_puts(users[i].password);
-        fb_putc('\n');
-        
-    }
     shell_init(login());
 
     //fb_puts((char *)ata_read_sector(0));

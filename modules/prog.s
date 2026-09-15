@@ -4,8 +4,6 @@ org 0x01000000
 jmp entry
 
 entry:
-    mov eax, 1
-    mov ebx, 0
-    int 0x80
+    jmp entry
 
 text db 'H', 0

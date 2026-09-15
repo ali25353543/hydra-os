@@ -1,3 +1,4 @@
+#include <vars.h>
 #include <types.h>
 #include <fb.h>
 #include <tar.h>
@@ -247,8 +248,15 @@ int tar_write(char *file_name, char *data, unsigned int data_size)
     return -1;
 }
 
-int exec(char *file_name, int *args)
+int exec(char *file_name, char *args)
 {
+    char **argv = strsplit(args, ' ');
+    int argc = 0;
+    while (argv[argc][0] != 0)
+    {
+        argc++;
+    }
+
     char *file_data = tar_read(file_name);
         if (file_data == NULL) {
             fb_puts("Error: Unable to read the file for execution.\n");
@@ -269,8 +277,10 @@ int exec(char *file_name, int *args)
         {
             dest[i] = file_data[i];
         }
-        typedef int (*call_t)(int *);
+        typedef int (*call_t)(char **, int);
         call_t prog = (call_t) address;
-        prog(args); // Call the function pointer to execute the code
+        
+        int stat = prog(argv, argc); // Call the function pointer to execute the code
+        set("?", stat);
         return 0; // Indicate success
 }

@@ -178,7 +178,6 @@ typedef struct {
  *  C function called by the common interrupt handler
  */
 
-/*
 void fb_puts_hex(unsigned int val) {
     char hex[] = "0123456789ABCDEF";
     char buf[11];
@@ -190,7 +189,7 @@ void fb_puts_hex(unsigned int val) {
     buf[10] = 0;
     fb_puts(buf);
 }
-*/
+
 
 void interrupt_handler_main(unsigned int *regs)
 {
@@ -231,6 +230,16 @@ void interrupt_handler_main(unsigned int *regs)
         pic_acknowledge(interrupt);
     } else if (interrupt == 0) {
         serial_write("#DE\n");
+        pic_acknowledge(interrupt);
+    } else if (interrupt == 6) {
+        fb_puts("Invailid Opcode at : \n");
+        fb_puts_hex(stack_ptr->eip);
+        fb_putc('\n');
+        while (1)
+        {
+            __asm__ ("hlt");
+        }
+        
         pic_acknowledge(interrupt);
     } else if (interrupt == 128) {
         if (stack_ptr->eax == 0)

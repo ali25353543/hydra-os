@@ -152,8 +152,7 @@ int shell_execute_command(char *buf)
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "exec") == 0 && args[0] != '\0') {
-        int argv[] = {0,0,0,0};
-        exec(args, argv) ? fb_puts("File executed successfully.\n") : fb_puts("\n");
+        exec(args, "") ? fb_puts("File executed successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(cmd, "psfedit") == 0) {
@@ -163,15 +162,7 @@ int shell_execute_command(char *buf)
         fb_puts(prompt);
     } else if (strcmp(cmd, "set") == 0) {
         if (args[0] == 0) {
-            extern vars_t vars[64];
-            for (unsigned char i = 0; i < 64; i++)
-            {
-                fb_puts(vars[i].name);
-                fb_putc('=');
-                fb_puts(int_to_str(vars[i].value));
-                fb_putc('\n');
-                for (unsigned int j = 0; j < 1000000; j++);
-            }
+            var_ls();
         } else {
             char **parts = strsplit(args, '=');
             set(parts[0], str_to_int(parts[1]));
@@ -183,7 +174,11 @@ int shell_execute_command(char *buf)
         fb_putc('\n');
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strncmp(args, " . ", 3) == 0) {
+    } else if (strcmp(cmd, "unset") == 0) {
+        unset(args);
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strncmp(args, " > ", 3) == 0) {
         char *data = args + 3; // Skip the " > " part
         tar_write(cmd, data, strlen(data)) ? fb_puts("File written successfully.\n") : fb_puts("\n");
         buffer_index = 0;

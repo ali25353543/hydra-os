@@ -28,4 +28,4 @@ int tar_create(char *file_name, unsigned int alloc_size);
 
 int tar_write(char *file_name, char *data, unsigned int data_size);
 
-int exec(char *file_name, int *args);
+int exec(char *file_name, char *args);
