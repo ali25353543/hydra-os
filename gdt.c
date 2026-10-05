@@ -18,7 +18,7 @@ struct gdt_ptr
     unsigned int base;
 }__attribute__((packed));
 
-/* Our GDT, with 3 entries */
+/* Our GDT, with 6 entries */
 struct gdt_entry gdt[6];
 struct gdt_ptr gp;
 

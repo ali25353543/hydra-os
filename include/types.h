@@ -22,5 +22,6 @@ char* strchar(char *str, char ch);
 char* strstring(char *haystack, char *needle);
 char *int_to_str(int num);
 int str_to_int(const char *str);
+int strncopy(const char *src, char *dist, int n);
 
 #endif //INCLUDE_TYPES_H

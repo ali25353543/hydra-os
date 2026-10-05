@@ -76,4 +76,6 @@ int serial_is_transmit_fifo_empty(unsigned int com);
  */
 int serial_write(char *buf);
 
+char serial_read();
+
 #endif /* INCLUDE_SERIAL_H */

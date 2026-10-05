@@ -232,14 +232,7 @@ void interrupt_handler_main(unsigned int *regs)
         serial_write("#DE\n");
         pic_acknowledge(interrupt);
     } else if (interrupt == 6) {
-        fb_puts("Invailid Opcode at : \n");
-        fb_puts_hex(stack_ptr->eip);
-        fb_putc('\n');
-        while (1)
-        {
-            __asm__ ("hlt");
-        }
-        
+        stack_ptr->eip = 0x00100000;
         pic_acknowledge(interrupt);
     } else if (interrupt == 128) {
         if (stack_ptr->eax == 0)

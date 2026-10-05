@@ -20,7 +20,9 @@ typedef struct {
 
 void tar_init(char *tar_start);
 
-void tar_info();
+void tar_dir();
+
+void tar_ls();
 
 char *tar_read(char *file_name);
 

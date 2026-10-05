@@ -4,7 +4,7 @@
 /** shell_init:
  *  Initializes the shell
  */
-void shell_init(char *username);
+void shell_init(char *username, unsigned char shell_flags);
 
 /** shell_update:
  *  Updates the shell (call this in main loop)

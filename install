@@ -8,13 +8,7 @@ function OSinstall() {
         echo "Error: kernel.elf not found!"
         exit 1
     fi
-    
-    # التأكد من وجود ملفات bin و users.txt
-    if [ ! -f *.bin ] 2>/dev/null; then
-        echo "Error: No .bin files found!"
-        exit 1
-    fi
-    
+
     if [ ! -f users.txt ]; then
         echo "Creating default users.txt..."
         echo "user=root" > users.txt
@@ -32,45 +26,31 @@ function OSinstall() {
             echo "### Hydra OS."
             echo "menuentry Hydra-OS {"
             echo "  multiboot /boot/kernel.elf"
-            for i in $(ls *.bin); do
-                echo "  module /modules/$i"
-            done
-            echo "  module /modules/users.txt"
+            echo "  module /modules/modules.tar"
+	    echo "  boot"
             echo "}"
         } >> /etc/grub.d/40_custom
         
-        mv ./kernel.elf /boot/
-        mkdir -p /modules
-        cp ./users.txt /modules/
-        cp ./*.bin /modules/
+        cp ./kernel.elf /boot/
+        cp ./modules.tar /boot/
         update-grub
-        
     else
         # تثبيت على جهاز آخر
-        mkdir -p "$1"/boot
-        mkdir -p "$1"/modules
         mkdir -p "$1"/boot/grub
-        
         {
             echo "### Hydra OS."
             echo "menuentry Hydra-OS {"
             echo "  multiboot /boot/kernel.elf"
-            for i in $(ls *.bin); do
-                echo "  module /modules/$i"
-            done
-            echo "  module /modules/users.txt"
+            echo "  module /boot/modules.tar"
+	    echo "  boot"
             echo "}"
         } >> "$1"/boot/grub/grub.cfg
-        
-        cp ./users.txt "$1"/modules/
-        cp ./*.bin "$1"/modules/
+        cp ./modules.tar "$1"/boot/
         cp ./kernel.elf "$1"/boot/
     fi
     
     make clean
     echo "Installation Complete."
-    
-    if [ "$1" == "" ]; then
         echo -n "Reboot(y/n)? "
         read choice
         if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
@@ -82,7 +62,6 @@ function OSinstall() {
             echo "The System has been installed."
             exit 1
         fi
-    fi
 }
 
 # التحقق من صلاحيات الجذر
@@ -103,7 +82,7 @@ if [ "$1" == "--device" ] && [ -n "$2" ]; then
     umount -l "/dev/$2" 2>/dev/null
     
     # تحميل الجهاز
-    mount "/dev/$2" "$MOUNT_POINT"
+    mount "/dev/$21" "$MOUNT_POINT"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to mount /dev/$2"
         exit 1
@@ -116,7 +95,7 @@ if [ "$1" == "--device" ] && [ -n "$2" ]; then
     else
         echo "GRUB is not installed on this drive."
         echo "Installing GRUB..."
-        grub-install --boot-directory="$MOUNT_POINT" --force "/dev/$2"
+        grub-install --boot-directory="$MOUNT_POINT"/boot --force "/dev/$2"
         if [ $? -eq 0 ]; then
             echo "GRUB installed successfully."
             OSinstall "$MOUNT_POINT"

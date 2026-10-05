@@ -12,8 +12,16 @@ align 4
 
 loader:
     cli                         ; تعطيل المقاطعات فورا
-    mov dx, 0x3F8
-    in al, dx
+    mov dx, 0x0430
+    in eax, dx
+    or eax, 3
+    out dx, eax
+    mov dx, 0xB2
+    mov al, 0xA0
+    out dx, al
+    mov ax, 0x3C00
+    mov dx, 0x0404
+    out dx, ax
     ; المعالج الآن في العنوان العالي 0xC010xxxx بأمان تماماً
     
     ; 6. الآن فقط نقوم بنقل المعالج للمكدس العالي الدائم للكيرنل

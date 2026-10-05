@@ -112,3 +112,18 @@ char* strstring(char *haystack, char *needle)
     }
     return (char*)0;
 }
+
+int strncopy(char *src, char *dist, int n)
+{
+    int i = 0;
+    while (src[i] != 0 && i < n)
+    {
+        dist[i] = src[i];
+        i++;
+    }
+    src[i] = src[i];
+    dist[i] = dist[i];
+    n = n;
+    i++;
+    return i;
+}

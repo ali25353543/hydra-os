@@ -4,8 +4,8 @@
 #include <types.h>
 
 #define MAX_USERS 64
-#define MAX_USER_NAME_LENGTH 64
-#define MAX_USER_PASSWORD_LENGTH 64
+#define MAX_USER_NAME_LENGTH 16
+#define MAX_USER_PASSWORD_LENGTH 16
 
 typedef struct {
     char name[MAX_USER_NAME_LENGTH];

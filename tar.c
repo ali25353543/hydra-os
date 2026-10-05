@@ -11,7 +11,7 @@ void tar_init(char *tar_start) {
     tar_disk_start = tar_start;
 }
 
-void tar_info()
+void tar_dir()
 {
     char *tar_file = tar_disk_start;
     while (tar_file[0] != '\0')
@@ -48,6 +48,43 @@ void tar_info()
     fb_putc('\n');
     tar_file += (512 + size + 511) & ~511; // الانتقال إلى رأس التار التالي
     }
+}
+
+void tar_ls()
+{
+    unsigned short i = 0;
+    char *tar_file = tar_disk_start;
+    while (tar_file[0] != '\0')
+    {
+    tar_header = *(tar_header_t *)tar_file;
+    unsigned int size = 0;
+
+    for (unsigned char i = 0; i < 11; i++)
+    {
+        // 1. تخطي المسافات أو الأصفار الممتلئة في البداية والنهاية
+    if (tar_header.size_raw[i] == ' ' || tar_header.size_raw[i] == '\0') {
+        continue; 
+    }
+    
+    // 2. التحقق من أن الحرف هو رقم ثماني صالح (بين '0' و '7')
+    if (tar_header.size_raw[i] >= '0' && tar_header.size_raw[i] <= '7') {
+            // إزاحة المجموع الحالي (الضرب في 8) ثم إضافة القيمة الرقمية الجديدة
+            size = (size << 3) + (tar_header.size_raw[i] - '0');
+        }
+    }
+    if ((tar_header.type - '0') == 0) {
+        fb_puts(tar_header.name);
+        fb_putc(' ');
+    } else if ((tar_header.type - '0') == 5) {
+        fb_putc('[');
+        fb_puts(tar_header.name);
+        fb_puts("] ");
+    }
+    if (((i + 1) % 5) == 0) fb_putc('\n');
+    i++;
+    tar_file += (512 + size + 511) & ~511; // الانتقال إلى رأس التار التالي
+    }
+    fb_putc('\n');
 }
 
 char *tar_read(char *file_name) {
@@ -250,18 +287,11 @@ int tar_write(char *file_name, char *data, unsigned int data_size)
 
 int exec(char *file_name, char *args)
 {
-    char **argv = strsplit(args, ' ');
-    int argc = 0;
-    while (argv[argc][0] != 0)
-    {
-        argc++;
-    }
-
     char *file_data = tar_read(file_name);
-        if (file_data == NULL) {
-            fb_puts("Error: Unable to read the file for execution.\n");
-            return -1;
-        }
+        //if (file_data == NULL) {
+        //    fb_puts("Error: Unable to read the file for execution.\n");
+        //    return -1;
+        //}
         // Assuming the file is a binary executable, we would typically jump to its entry point.
         // However, in this context, we will just print a message indicating execution.
         //if (strncmp(file_data, "Hydra OS", 8) != 0) {
@@ -277,10 +307,10 @@ int exec(char *file_name, char *args)
         {
             dest[i] = file_data[i];
         }
-        typedef int (*call_t)(char **, int);
+        typedef int (*call_t)(char *);
         call_t prog = (call_t) address;
         
-        int stat = prog(argv, argc); // Call the function pointer to execute the code
+        int stat = prog(args); // Call the function pointer to execute the code
         set("?", stat);
         return 0; // Indicate success
 }

@@ -15,6 +15,16 @@ static char command_buffer[COMMAND_BUFFER_SIZE];
 static unsigned int buffer_index = 0;
 static char *prompt = NULL;
 static int state = 0;
+static uint8_t flags = 0;
+static char commands[256][32] = {
+    "help", "clear", "echo", "about",
+    "play", "beep", "set", "get",
+    "unset", "logout", "beep", "dir",
+    "ls", "cat", "touch", "rawcopy",
+    "edit", "set", "get", "unset",
+    "tty"
+};
+
 
 /** shell_clear_command:
  *  Clears the screen
@@ -27,7 +37,7 @@ void shell_clear_command(void)
 /** shell_help_command:
  *  Displays help information
  */
-void shell_help_command(void)
+void shell_help_command()
 {
     fb_puts("Available commands:\n");
     fb_puts("  help  - Display this help message\n");
@@ -35,6 +45,16 @@ void shell_help_command(void)
     fb_puts("  echo  - Echo back your text\n");
     fb_puts("  about - Display OS information\n");
     fb_puts("  play  - Play Snake game!\n");
+    fb_puts("  beep  - Make Sound on buzzer\n");
+    fb_puts("  set   - Set an Variable with Value\n");
+    fb_puts("  get   - Get and Print Variable's Value\n");
+    fb_puts("  unset - Unset an Variable\n");
+    fb_puts("  dir   - List files in DOS mode\n");
+    fb_puts("  ls    - List files in UNIX mode\n");
+    fb_puts("  touch - Create file in TARFS\n");
+    fb_puts("  cat   - Show content of file in TARFS\n");
+    fb_puts("  tty   - Switch Current Frame Buffer page\n");
+
 }
 
 /** shell_echo_command:
@@ -92,116 +112,152 @@ int shell_execute_command(char *buf)
     }
     
     /* Parse command and arguments */
-    char *cmd = buf;
-    char *args = buf;
+    char *args = buf; //Compability with old commands
+    //char *cmd = buf;
+    while (*args && *args != ' ')
+    {
+        args++;
+    }
+    if (*args == ' ')
+    {
+        *args = '\0';
+        args++;
+    }
     
-    /* Find first space to separate command from arguments */
-        while (*args && *args != ' ') {
-            args++;
-        }
-    
-        if (*args == ' ') {
-            *args = '\0';
-            args++;
-        }
+    int argc = 0;
+    char **argv = strsplit(buf, ' ');
+    while (argv[argc][0] != 0)
+    {
+        argc++;
+    }
     /* Execute command */
-    if (strcmp(cmd, "help") == 0) {
+    if (strcmp(argv[0], commands[0]) == 0) {
         shell_help_command();
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "clear") == 0) {
+    } else if (strcmp(argv[0], "clear") == 0) {
         shell_clear_command();
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "echo") == 0) {
+    } else if (strcmp(argv[0], "echo") == 0) {
         shell_echo_command(args);
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "about") == 0) {
+    } else if (strcmp(argv[0], "about") == 0) {
         shell_about_command();
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "play") == 0) {
+    } else if (strcmp(argv[0], "play") == 0) {
         state = shell_play_command();
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "logout") == 0) {
+    } else if (strcmp(argv[0], "logout") == 0) {
         fb_clear();
-        login();
+        users_init(tar_read("users.txt"));
+        shell_init(login(), 1);
         buffer_index = 0;
-        fb_puts(prompt);
-    } else if (strcmp(cmd, "beep") == 0) {
-        char **parts = strsplit(args,' ');
-        char *freq = parts[0];
-        char *duration = parts[1];
+    } else if (strcmp(argv[0], "beep") == 0) {
+        char *freq = argv[1];
+        char *duration = argv[2];
         int int_freq = str_to_int(freq);
         int int_duration = str_to_int(duration);
         beep(int_freq,int_duration);
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "dir") == 0) {
-        tar_info();
+    } else if (strcmp(argv[0], "dir") == 0) {
+        tar_dir();
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "type") == 0) {
+    } else if (strcmp(argv[0], "ls") == 0) {
+        tar_ls();
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(argv[0], "cat") == 0) {
         fb_puts(tar_read(args) ? tar_read(args) : "\n");
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "touch") == 0) {
+    } else if (strcmp(argv[0], "touch") == 0) {
         tar_create(args, 0) ? fb_puts("File created successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "exec") == 0 && args[0] != '\0') {
-        exec(args, "") ? fb_puts("File executed successfully.\n") : fb_puts("\n");
+    } else if (strcmp(argv[0], "exec") == 0) {
+        exec(argv[1], args) ? fb_puts("File executed successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "psfedit") == 0) {
-        int psfedit(char *psf_file);
-        psfedit("df");
+    } else if (strcmp(argv[0], "edit") == 0) {
+        int edit(char *file_name);
+        edit(argv[1]);
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "set") == 0) {
-        if (args[0] == 0) {
+    } else if (strcmp(argv[0], "set") == 0) {
+        if (argv[1][0] == 0) {
             var_ls();
         } else {
-            char **parts = strsplit(args, '=');
+            char **parts = strsplit(argv[1], '=');
             set(parts[0], str_to_int(parts[1]));
         }
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "get") == 0) {
-        fb_puts(int_to_str(get(args)));
+    } else if (strcmp(argv[0], "get") == 0) {
+        fb_puts(int_to_str(get(argv[1])));
         fb_putc('\n');
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(cmd, "unset") == 0) {
-        unset(args);
+    } else if (strcmp(argv[0], "unset") == 0) {
+        unset(argv[1]);
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strncmp(args, " > ", 3) == 0) {
-        char *data = args + 3; // Skip the " > " part
-        tar_write(cmd, data, strlen(data)) ? fb_puts("File written successfully.\n") : fb_puts("\n");
+    } else if (strcmp(argv[0], "tty") == 0) {
+        if (str_to_int(argv[1]) < 0 || str_to_int(argv[1]) > 7)
+        {
+            fb_puts("Invailid Page number.\n");
+        } else {
+            unsigned short select_cursor();
+            void set_cursor_value(unsigned short value);
+            unsigned short pos = select_cursor();
+            pos -= 80;
+            set_cursor_value(pos);
+            fb_switch_page(str_to_int(argv[1]));
+            extern char *fb;
+            if (fb[0] == 0)
+            {
+                fb_clear();
+            }
+        }
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(argv[1], ">") == 0) {
+        tar_write(argv[0], argv[2], strlen(argv[2])) ? fb_puts("File written successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
     } else {
         /* we’ll never get here, unless the module code returns */
         fb_puts("Unknown command: ");
-        fb_puts(cmd);
+        fb_puts(argv[0]);
         fb_puts("\nType 'help' for available commands.\n");
         buffer_index = 0;
         fb_puts(prompt);
         return 127;
     }
-    
     /* Reset buffer and show prompt */
     return 0;
 }
 
 /** shell_init:
- *  Initializes the shell
+ *  Initializes the shell with Shell Flags (SF)
+ *  Shell Flags:
+ *  ___________________________________________
+ *  | bit | Description                       |
+ *  |  0  | Login Shell Flag (LSF)            |
+ *  |  1  | (0: UNIX, 1: DOS)                 |
+ *  |  2  | Change Prompt Ability Flag (CPAF) |
+ *  |  3  | Variable Table Flag (VTF)         |
+ *  |  4  | AM8 Flag (AM8F)                   |
+ *  | 5-7 | Unuused (Yet)                     |
  */
-void shell_init(char *username)
+void shell_init(char *username, uint8_t shell_flags)
 {
+    flags = shell_flags;
     buffer_index = 0;
     prompt = username;
     state = 0;
@@ -227,16 +283,19 @@ void shell_update(void)
         if (c == '\n') {
             /* Execute command */
             fb_putc('\n');
-            shell_execute_command(command_buffer);
+            set("$", shell_execute_command(command_buffer));
         } else if (c == '\b') {
             /* Handle backspace */
             if (buffer_index > 0) {
                 buffer_index--;
                 fb_putc('\b');
+            } else {
+                beep(480, 100);
             }
         } else if (c == 27) {
             fb_clear();
-            login();
+            users_init(tar_read("users.txt"));
+            shell_init(login(), 1);
         } else if (buffer_index < COMMAND_BUFFER_SIZE - 1) {
             /* Add character to buffer */
             command_buffer[buffer_index] = c;

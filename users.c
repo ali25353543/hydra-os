@@ -6,19 +6,16 @@ user_t users[MAX_USERS];
 void users_init(char *file) {
     // تهيئة جميع المستخدمين
     for (uint8_t i = 0; i < MAX_USERS; i++) {
-        users[i].name[0] = '\0';
-        users[i].password[0] = '\0';
+        strcopy("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",users[i].name);
+        strcopy("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",users[i].password);
     }
-   char *token = "";
    char **tokens = strsplit(file, '\n');
    int i = 0;
    while (*tokens != 0 && i < MAX_USERS)
    {
-    token = *tokens + 5;
-    strcopy(token, users[i].name);
+    strcopy(*tokens + 5, users[i].name);
     tokens++;
-    token = *tokens + 9;
-    strcopy(token, users[i].password);
+    strcopy(*tokens + 9, users[i].password);
     tokens++;
     i++;
 
@@ -52,7 +49,7 @@ char *login() {
     
     // قراءة اسم المستخدم
     i = 0;
-    while (i < MAX_USER_NAME_LENGTH - 1) {
+    while (i < MAX_USER_NAME_LENGTH) {
         c = keyboard_get_char();
         if (c == '\n') break;
         if (c != 0) {
@@ -67,13 +64,14 @@ char *login() {
     uint8_t user_index = check_name(name);
     
     if (user_index == 255) {
-        fb_puts("User not found!\n");
+        fb_puts(name);
+        fb_puts("\nUser not found!\n");
         return login();
     }
     
     fb_puts("Password: ");
     i = 0;
-    while (i < MAX_USER_PASSWORD_LENGTH - 1) {
+    while (i < MAX_USER_PASSWORD_LENGTH) {
         c = keyboard_get_char();
         if (c == '\n') break;
         if (c != 0) {
@@ -85,7 +83,7 @@ char *login() {
     fb_putc('\n');
     
     // التحقق من كلمة المرور
-    if (check_password(password) == 0) {
+    if (check_password(password) != 255) {
         fb_puts("Login successful!\n");
         return users[user_index].name;
     } else {

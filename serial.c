@@ -99,3 +99,9 @@ int serial_write(char *buf)
     }
     return i;
 }
+
+char serial_read()
+{
+    while ((inb(SERIAL_COM1_BASE + 5) & 1) == 0);
+    return inb(SERIAL_COM1_BASE);
+}

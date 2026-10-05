@@ -9,6 +9,7 @@
         "span": "c",
         "io.h": "c",
         "gdt.h": "c",
+        "tar.h": "c",
         "bitset": "c",
         "cstddef": "c"
     },

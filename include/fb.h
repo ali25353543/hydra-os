@@ -62,4 +62,6 @@ void fb_putc(char c);
  */
 void fb_puts(char *str);
 
+void fb_switch_page(unsigned char page_num); 
+
 #endif /* INCLUDE_FB_H */

@@ -6,20 +6,16 @@ _start:
     ; حفظ مسجلات النواة لحمايتها
     push ebx
     push esi
-    mov word [0xB8000], 0X410F
-
-    ; 1. جلب مؤشر الـ argv من المكدس
-    ; المكدس يحتوي على: [esp + 12] وهو مؤشر مصفوفة args الممررة من دالة exec
-    mov edx, [esp + 12] 
     
     ; 2. استخراج المتغيرات من المصفوفة args
-    mov eax, [edx + 4]   ; جلب الـ Divisor (الذي قيمته 12)
-    mov ebx, [edx]       ; جلب رقم المنفذ Base Port (الذي قيمته 0x3F8)
-
-    ; 3. تهيئة المنفذ (نفس كود التهيئة الخاص بك)
-    mov ecx, ebx
-    add ax, 3
-    mov dx, ax
+    mov eax, [esp + 4]   ; جلب الـ Divisor (الذي قيمته 12)
+    add eax, 10
+    mov bx, [eax]
+    sub bh, '0'
+    sub bl, '0'
+    mov cx, bx
+    ; 3. تهيئة المنفذ (نفس كود التهيئة الخاص بك
+    mov dx, 0x3FB
     mov ax, 0x80
     out dx, al
     sub dx, 3
