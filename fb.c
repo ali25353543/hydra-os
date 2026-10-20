@@ -256,3 +256,31 @@ void fb_switch_page(unsigned char page_num)
     fb_move_cursor(select_cursor());
     active_page = page_num;
 }
+
+
+void fb_puts_addr(unsigned int val)
+{
+    char hex[] = "0123456789ABCDEF";
+    char buf[11];
+    buf[0] = '0';
+    buf[1] = 'x';
+    for (int i = 0; i < 8; i++) {
+        buf[2 + i] = hex[(val >> (28 - i * 4)) & 0xF];
+    }
+    buf[10] = 0;
+    fb_puts(buf);
+}
+
+void fb_puts_hex(unsigned int val, unsigned char len)
+{
+    char hex[] = "0123456789ABCDEF";
+    char buf[9];
+    int i = 0;
+    while (len > 0) {
+        buf[i] = hex[(val >> (28 - i * 4)) & 0xF];
+        i++;
+        len--;
+    }
+    buf[8] = 0;
+    fb_puts(buf);
+}

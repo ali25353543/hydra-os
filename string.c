@@ -127,3 +127,24 @@ int strncopy(char *src, char *dist, int n)
     i++;
     return i;
 }
+
+int memcpy(char *src, char *dist, int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        dist[i] = src[i];
+    }
+    return n;
+}
+
+int memcmp(const char *s1, const char *s2, unsigned int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        if (s1[i] != s2[i])
+        {
+            return s1[i] - s2[i];
+        }
+    }
+    return 0;
+}

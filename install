@@ -27,7 +27,7 @@ function OSinstall() {
             echo "menuentry Hydra-OS {"
             echo "  multiboot /boot/kernel.elf"
             echo "  module /modules/modules.tar"
-	    echo "  boot"
+	        echo "  boot"
             echo "}"
         } >> /etc/grub.d/40_custom
         
@@ -42,7 +42,7 @@ function OSinstall() {
             echo "menuentry Hydra-OS {"
             echo "  multiboot /boot/kernel.elf"
             echo "  module /boot/modules.tar"
-	    echo "  boot"
+	        echo "  boot"
             echo "}"
         } >> "$1"/boot/grub/grub.cfg
         cp ./modules.tar "$1"/boot/

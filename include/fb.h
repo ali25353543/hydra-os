@@ -64,4 +64,8 @@ void fb_puts(char *str);
 
 void fb_switch_page(unsigned char page_num); 
 
+void fb_puts_addr(unsigned int val);
+
+void fb_puts_hex(unsigned int val, unsigned char len);
+
 #endif /* INCLUDE_FB_H */

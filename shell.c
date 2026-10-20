@@ -78,7 +78,8 @@ int shell_about_command(void)
     fb_puts("Built following 'The little book about OS development'\n");
     fb_puts("Developer - MultiX\n");
     fb_puts("Developer Message - \n"
-        "as a full-stack developer i always use high-level programming languages like javascript, dart, golang, and others\n"
+        "as a full-stack developer i always use high-level programming languages like \n"
+        "javascript, dart, golang, and others\n"
         "\n"
         "i really want to challenge myself and go through a new journey to deal with low-level code\n"
         "it's really funny, hard, with a lot of tears tbh, but it was a really fun experience\n");
@@ -180,8 +181,8 @@ int shell_execute_command(char *buf)
         tar_create(args, 0) ? fb_puts("File created successfully.\n") : fb_puts("\n");
         buffer_index = 0;
         fb_puts(prompt);
-    } else if (strcmp(argv[0], "exec") == 0) {
-        exec(argv[1], args) ? fb_puts("File executed successfully.\n") : fb_puts("\n");
+    } else if (strcmp(argv[0], "real") == 0) {
+        exec("real.bin");
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(argv[0], "edit") == 0) {
@@ -205,6 +206,11 @@ int shell_execute_command(char *buf)
         fb_puts(prompt);
     } else if (strcmp(argv[0], "unset") == 0) {
         unset(argv[1]);
+        buffer_index = 0;
+        fb_puts(prompt);
+    } else if (strcmp(argv[0], "am8") == 0) {
+        int AM8(char *);
+        AM8(argv[1]);
         buffer_index = 0;
         fb_puts(prompt);
     } else if (strcmp(argv[0], "tty") == 0) {

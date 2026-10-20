@@ -1,23 +1,9 @@
 bits 32
-org 0x01000000
+org 0x00010000
+db 0 ;Normal Program
 
-push ebx
-push esi
-mov ebx, 0xB8000
-
-jmp entry
-
-entry:
-    mov dx, 0x3F8
-    in al, dx
-    cmp al, 0
-    je .skip
-    mov [ebx], al
-    mov byte [ebx + 1], 0x0F
-    add ebx, 2
-    jmp entry
-.skip:
-    add ebx, 2
-    jmp entry
+main:
+    mov word [0xB8000], 0x0F41
+    jmp main
 
 text db 'H', 0

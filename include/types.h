@@ -12,6 +12,7 @@ typedef int int32_t;
 typedef unsigned long uint64_t;
 typedef long int64_t;
 typedef unsigned int size_t;
+#define defcall_type(func_type, type_name, ...) typedef func_type (*type_name)(...);
 
 int strcmp(const char *s1, const char *s2);
 char **strsplit(const char *str, char delim);
@@ -23,5 +24,7 @@ char* strstring(char *haystack, char *needle);
 char *int_to_str(int num);
 int str_to_int(const char *str);
 int strncopy(const char *src, char *dist, int n);
+int memcpy(char *src, char *dist, int n);
+int memcmp(const char *s1, const char *s2, unsigned int n);
 
 #endif //INCLUDE_TYPES_H

@@ -1,9 +1,9 @@
 OBJECTS = loader.o kmain.o io.o fb.o serial.o gdt.o gdt_s.o idt.o idt_s.o keyboard.o shell.o snake.o \
-beep.o string.o ata.o fat32.o users.o tar.o font.o edit.o vars.o
+beep.o string.o ata.o fat32.o users.o tar.o font.o edit.o vars.o procmgr.o am8.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
          -nostartfiles -nodefaultlibs -fno-pic -fno-pie -Wall -Wextra -Werror -I ./include -c
-LDFLAGS = -T link.ld -melf_i386
+LDFLAGS = -T link.ld -melf_i386 -no-pie
 AS = nasm
 ASFLAGS = -f elf
 MODULES_SRC = $(wildcard modules/*.s)
@@ -38,7 +38,7 @@ hydra.img: kernel.elf
 run_qemu: hydra.img
 	rm serial.out ; \
 	touch serial.out ; \
-	sudo qemu-system-i386 -enable-kvm -M q35 -machine smm=on -cpu host -vga std -drive file=./hydra.img,format=raw,cache=none -serial file:serial.out -m 4G #-audiodev driver=pipewire,id=snd0
+	sudo qemu-system-i386 -M q35 -machine smm=on -vga std -d int,cpu_reset -drive file=./hydra.img,format=raw,cache=none -serial file:serial.out -m 4G #-audiodev driver=pipewire,id=snd0
 
 run_bochs: hydra.img
 	rm bochslog.txt ; \

@@ -65,5 +65,4 @@ void interrupt_handler_47(void);
 void interrupt_handler_128(void);
 void interrupt_handler_main(unsigned int *esp);
 
-
 #endif /* INCLUDE_IDT_H */

@@ -1,11 +1,12 @@
+OUTPUT_FORMAT("binary")
 ENTRY(loader) /* اسم رمز نقطة الدخول */
 
 SECTIONS
 {
     /* يجب وضع تعيين العنوان داخل كتلة SECTIONS */
-    . = 0x00100000; /* العنوان الظاهري VMA = 3GB + 1MB */
-    kernel_phisycal_address = .;
-    .text ALIGN(0x1000) :
+    . = 0x08000000; /* العنوان الظاهري VMA = 3GB + 1MB */
+    kernel_start = .;
+    .text ALIGN(0x1000):
     {
         *(.text .text.*) /* جميع أجزاء الكود */
     }
@@ -19,11 +20,15 @@ SECTIONS
     {
         *(.data .data.*) /* البيانات المعرفة المتغيرة */
     }
+    data_end = .;
 
     .bss ALIGN(0x1000) :
     {
         *(COMMON)
         *(.bss .bss.*)
     }
-    kernel_phisycal_end = .;
+    bss_end = .;
+
+    kernel_end = .;
+    kernel_size = kernel_end - kernel_start;
 }
