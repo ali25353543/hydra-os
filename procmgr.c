@@ -3,8 +3,6 @@ typedef struct {
     unsigned char name[32];
     unsigned char pid;
     unsigned int addr;
-    unsigned short pos;
-    unsigned int addr_pos;
 } proc_t;
 
 proc_t procs[64];
